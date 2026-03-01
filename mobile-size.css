@@ -1,0 +1,179 @@
+/* ================================================================
+   MOBILE FIX PATCH — mobile-fix.css
+   Add AFTER mobile.css: <link rel="stylesheet" href="mobile-fix.css" />
+   SAFE: Does NOT touch #mainContent or #cityPage display globally
+   ================================================================ */
+
+/* ─── Only on mobile ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* When body gets class .city-page-open, hide the navbar */
+  body.city-page-open #navbar {
+    display: none !important;
+  }
+
+  /* Remove the padding-top that was compensating for navbar */
+  body.city-page-open {
+    padding-top: 0 !important;
+  }
+
+  /* City page: ensure it sits above everything when visible */
+  #cityPage {
+    z-index: 2000 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* ── BACK BUTTON — fixed pill, always visible ─────────────── */
+  .city-back-btn {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top, 0px) + 0.65rem) !important;
+    left: 1rem !important;
+    z-index: 2100 !important;
+    min-height: 44px !important;
+    padding: 0 1.1rem !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    font-family: inherit !important;
+    border-radius: 22px !important;
+    background: rgba(10, 8, 20, 0.82) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+    transition: background 0.15s !important;
+  }
+
+  .city-back-btn:active {
+    background: rgba(254, 250, 205, 0.2) !important;
+    border-color: rgba(254, 250, 205, 0.5) !important;
+  }
+
+  /* Push city-hero content down so back btn doesn't cover title */
+  .city-hero-content {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 4rem) !important;
+    justify-content: flex-end !important;
+  }
+
+  /* ── CITY HERO SIZE ─────────────────────────────────────────── */
+  .city-hero {
+    height: 60vw !important;
+    min-height: 240px !important;
+    max-height: 360px !important;
+  }
+
+  /* ── CITY TITLES ────────────────────────────────────────────── */
+  .city-hero-title {
+    font-size: clamp(1.6rem, 7vw, 2.8rem) !important;
+    line-height: 1.05 !important;
+    color: #fff !important;
+  }
+
+  .city-hero-tagline {
+    font-size: 0.78rem !important;
+    opacity: 0.88 !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .city-plan-btn {
+    min-height: 46px !important;
+    font-size: 0.82rem !important;
+    padding: 0 1.1rem !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    cursor: pointer !important;
+  }
+
+  /* ── CITY TABS ──────────────────────────────────────────────── */
+  .city-tab {
+    min-height: 48px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    cursor: pointer !important;
+  }
+
+  /* ── PLACE CARDS — full touch ───────────────────────────────── */
+  .place-card {
+    cursor: pointer !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    transition: transform 0.12s ease !important;
+  }
+
+  .place-card:active {
+    transform: scale(0.97) !important;
+  }
+
+  /* Force all children non-interactive so card click works */
+  .place-card .place-img-wrap,
+  .place-card .place-img-wrap img,
+  .place-card .place-img-overlay,
+  .place-card .place-badge,
+  .place-card .place-hover-cta,
+  .place-card .place-info,
+  .place-card .place-info h3,
+  .place-card .place-info p {
+    pointer-events: none !important;
+  }
+
+  /* Tap-to-explore always visible on mobile */
+  .place-hover-cta {
+    opacity: 1 !important;
+    transform: none !important;
+    background: rgba(10, 8, 20, 0.6) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+    padding: 0.25rem 0.6rem !important;
+    border-radius: 20px !important;
+  }
+
+  /* ── ALL BUTTONS — touch targets ───────────────────────────── */
+  .wiz-chip,
+  .wiz-budget-card,
+  .wiz-count-btn,
+  .wiz-btn-back,
+  .wiz-btn-next,
+  .wiz-loc-btn,
+  .map-hint-chips span,
+  .chat-suggestions button,
+  .chatbot-btn,
+  .chat-close,
+  .chat-send,
+  .auth-submit,
+  .auth-social-btn,
+  .auth-close,
+  .auth-pw-toggle,
+  .btn-nav-login,
+  .btn-nav-signup,
+  .btn-primary,
+  .btn-ghost,
+  .btn-map-chat,
+  .btn-map-plan,
+  .hamburger,
+  .btn-theme-toggle,
+  .social-btn {
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    cursor: pointer !important;
+  }
+
+  .wiz-chip       { min-height: 40px !important; user-select: none !important; }
+  .wiz-count-btn  { min-width: 44px !important; min-height: 44px !important; }
+  .map-hint-chips span { min-height: 36px !important; }
+}
