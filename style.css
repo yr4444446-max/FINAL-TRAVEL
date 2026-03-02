@@ -5676,3 +5676,768 @@ input:-webkit-autofill:focus {
   object-fit: cover;
   object-position: center;
 }
+/* ════════════════════════════════════════════════════════
+   ROAMY-STYLE AI PLANNER — Spot-by-Spot Itinerary View
+   ════════════════════════════════════════════════════════ */
+
+/* Overview blurb */
+.rp-overview {
+  font-size: .9rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  padding: .85rem 1.1rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: .1rem;
+}
+
+/* AI badge inside card header */
+.rp-ai-badge {
+  margin-left: auto;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--lc);
+  background: rgba(58,140,126,.12);
+  border: 1px solid rgba(58,140,126,.25);
+  border-radius: 20px;
+  padding: .18rem .65rem;
+}
+
+/* ── DAY TABS ─────────────────────────────────────────── */
+.rp-tabs-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+}
+.rp-tabs-wrap::-webkit-scrollbar { display: none; }
+
+.rp-day-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0;
+  min-width: max-content;
+}
+
+.rp-day-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: .75rem 1.1rem;
+  min-width: 80px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: background .15s, border-color .15s;
+  gap: .2rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rp-day-tab:hover {
+  background: var(--bg-2);
+}
+
+.rp-day-tab.active {
+  border-bottom-color: var(--lc);
+  background: rgba(58,140,126,.07);
+}
+
+.rp-tab-num {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+}
+
+.rp-day-tab.active .rp-tab-num {
+  color: var(--lc);
+}
+
+.rp-tab-title {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── DAY PANELS ───────────────────────────────────────── */
+.rp-days-container { position: relative; }
+
+.rp-day-panel { display: none; padding: 0; }
+.rp-day-panel.active { display: block; }
+
+.rp-day-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .85rem 1.1rem;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.rp-day-badge {
+  font-size: .65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: .25rem .75rem;
+  border-radius: 20px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rp-day-title-full {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+
+.rp-day-spot-count {
+  font-size: .65rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .18rem .6rem;
+}
+
+/* ── SPOTS LIST ───────────────────────────────────────── */
+.rp-spots-list {
+  padding: .75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.rp-spot-item {
+  display: flex;
+  gap: .85rem;
+  align-items: flex-start;
+  padding: .85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rp-spot-item:last-child {
+  border-bottom: none;
+  padding-bottom: .25rem;
+}
+
+.rp-spot-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--lc);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rp-spot-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rp-spot-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .5rem;
+  margin-bottom: .35rem;
+}
+
+.rp-spot-info { flex: 1; min-width: 0; }
+
+.rp-spot-name {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: .3rem;
+}
+
+.rp-spot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  align-items: center;
+}
+
+.rp-spot-cat {
+  font-size: .6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: .18rem .55rem;
+  border-radius: 20px;
+}
+
+.rp-spot-time, .rp-spot-dur {
+  font-size: .68rem;
+  color: var(--text-muted);
+}
+
+.rp-spot-fee {
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--lc);
+  background: rgba(58,140,126,.1);
+  border: 1px solid rgba(58,140,126,.2);
+  border-radius: 8px;
+  padding: .2rem .55rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rp-spot-desc {
+  font-size: .82rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0 0 .45rem;
+}
+
+.rp-spot-tip {
+  font-size: .75rem;
+  color: #f59e0b;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.18);
+  border-radius: 8px;
+  padding: .3rem .65rem;
+  line-height: 1.45;
+}
+
+/* ── TRAVEL CONNECTOR between spots ─────────────────── */
+.rp-travel-connector {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-top: .55rem;
+  padding-left: .1rem;
+}
+
+.rp-travel-line {
+  width: 20px;
+  height: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.rp-travel-badge {
+  font-size: .68rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .2rem .65rem;
+  white-space: nowrap;
+}
+
+/* ── TIPS CARD ────────────────────────────────────────── */
+.rp-tips-card .plan-card-header { margin-bottom: 0; }
+
+.rp-tips-list {
+  padding: .75rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.rp-tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  font-size: .84rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.rp-tip-dot {
+  color: var(--lc);
+  font-size: .75rem;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* ── HOTEL RATING ─────────────────────────────────────── */
+.rp-hotel-rating {
+  font-size: .78rem;
+  color: #f59e0b;
+  margin: .2rem 0 .15rem;
+}
+.rp-hotel-rating span {
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-left: .25rem;
+}
+
+/* ── INFO BODY (best time, etc.) ──────────────────────── */
+.rp-info-body {
+  padding: .85rem 1.1rem;
+  font-size: .84rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── EMERGENCY NUMBERS ────────────────────────────────── */
+.rp-emergency-list {
+  padding: .6rem 1.1rem .85rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.rp-em-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .82rem;
+  padding: .45rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.rp-em-item:last-child { border-bottom: none; }
+.rp-em-item span { color: var(--text-muted); }
+.rp-em-item strong { font-weight: 700; color: var(--text); }
+
+/* ── LIGHT THEME OVERRIDES ────────────────────────────── */
+[data-theme="light"] .rp-overview {
+  background: #f0faf8;
+  border-color: #c8e8e3;
+  color: #3a6058;
+}
+
+[data-theme="light"] .rp-day-tab.active {
+  background: rgba(58,140,126,.06);
+}
+
+[data-theme="light"] .rp-spot-fee {
+  background: rgba(58,140,126,.08);
+}
+
+[data-theme="light"] .rp-travel-badge {
+  background: #f5f5f5;
+}
+
+[data-theme="light"] .rp-tip-item {
+  color: #1a3530;
+}
+
+/* ── MOBILE OVERRIDES ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .rp-day-tab {
+    min-width: 72px;
+    padding: .65rem .85rem;
+  }
+  .rp-tab-title {
+    font-size: .62rem;
+    max-width: 80px;
+  }
+  .rp-spot-name { font-size: .9rem; }
+  .rp-spot-desc { font-size: .78rem; }
+  .rp-spot-num { width: 24px; height: 24px; font-size: .65rem; }
+  .rp-spot-item { gap: .65rem; padding: .75rem 0; }
+  .rp-spots-list { padding: .5rem .85rem; }
+  .rp-day-header { padding: .75rem .85rem; gap: .55rem; }
+  .rp-day-title-full { font-size: .82rem; }
+  .rp-spot-fee { font-size: .68rem; }
+}
+
+/* ════════════════════════════════════════════════════════
+   RICH TRANSPORT & HOTEL CARDS — v2
+   ════════════════════════════════════════════════════════ */
+
+/* ── TRANSPORT CARD ─────────────────────────────────────── */
+.rp-transport-summary {
+  font-size: .85rem;
+  color: var(--text-muted);
+  padding: .75rem 1.1rem .5rem;
+  line-height: 1.55;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Mode tabs (Train / Bus / Flight) */
+.rp-transport-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.rp-transport-tabs::-webkit-scrollbar { display: none; }
+
+.rp-trans-tab {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .75rem 1.1rem;
+  min-width: 90px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all .15s;
+  white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.rp-trans-tab:hover { background: var(--bg-2); }
+.rp-trans-tab.active {
+  color: var(--tab-color, var(--lc));
+  border-bottom-color: var(--tab-color, var(--lc));
+  background: color-mix(in srgb, var(--tab-color, var(--lc)) 8%, transparent);
+}
+.rp-trans-tab-icon { font-size: 1.1rem; }
+.rp-trans-tab-label { font-size: .78rem; }
+
+/* Route panels */
+.rp-trans-panel { display: none; padding: .85rem 1rem; display: none; flex-direction: column; gap: .75rem; }
+.rp-trans-panel.active { display: flex; }
+
+/* Individual route card */
+.rp-route-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-left: 4px solid #3b82f6;
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+
+.rp-route-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .5rem;
+}
+.rp-route-name {
+  font-size: .92rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.rp-route-num {
+  font-size: .72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.rp-route-fare {
+  font-size: .8rem;
+  font-weight: 800;
+  color: var(--lc);
+  background: rgba(58,140,126,.1);
+  border: 1px solid rgba(58,140,126,.2);
+  border-radius: 8px;
+  padding: .25rem .65rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Journey from → to */
+.rp-route-journey {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 0;
+}
+.rp-route-from, .rp-route-to {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+  flex: 1;
+}
+.rp-route-to { justify-content: flex-end; text-align: right; }
+.rp-route-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.rp-route-dot--from { background: var(--text-muted); border: 2px solid var(--border); }
+.rp-route-dot--to { background: #3b82f6; }
+.rp-route-station-label { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: .15rem; }
+.rp-route-station { font-size: .8rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+.rp-route-line {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  position: relative;
+}
+.rp-route-line::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.rp-route-duration {
+  font-size: .68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .18rem .65rem;
+  z-index: 1;
+  position: relative;
+  white-space: nowrap;
+}
+
+/* Meta chips (departs, frequency) */
+.rp-route-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.rp-route-chip {
+  font-size: .68rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .2rem .65rem;
+}
+
+.rp-route-tip {
+  font-size: .74rem;
+  color: #f59e0b;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.18);
+  border-radius: 8px;
+  padding: .35rem .7rem;
+  line-height: 1.45;
+}
+
+/* Local transport grid */
+.rp-local-transport {
+  border-top: 1px solid var(--border);
+  padding: .85rem 1rem;
+}
+.rp-local-header {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+  margin-bottom: .65rem;
+}
+.rp-local-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .6rem;
+}
+.rp-local-item {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .75rem .6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  text-align: center;
+}
+.rp-local-icon { font-size: 1.5rem; }
+.rp-local-mode { font-size: .72rem; font-weight: 700; color: var(--text); }
+.rp-local-cost { font-size: .68rem; color: var(--lc); font-weight: 700; }
+.rp-local-tip { font-size: .6rem; color: var(--text-muted); line-height: 1.4; margin-top: .1rem; }
+
+/* ── HOTEL CARDS ─────────────────────────────────────────── */
+.rp-hotels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: .85rem;
+  padding: 1rem;
+}
+
+.rp-hotel-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  transition: box-shadow .2s, transform .2s;
+}
+.rp-hotel-card:hover {
+  box-shadow: 0 6px 28px rgba(0,0,0,.18);
+  transform: translateY(-2px);
+}
+
+.rp-hotel-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rp-hotel-type-badge {
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: .2rem .7rem;
+  border-radius: 20px;
+  border: 1px solid;
+}
+.rp-hotel-stars { font-size: .85rem; letter-spacing: -.5px; color: #f59e0b; }
+.rp-hotel-stars-empty { color: var(--border); }
+
+.rp-hotel-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.rp-hotel-location {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-start;
+  font-size: .8rem;
+  color: var(--text-muted);
+}
+.rp-hotel-area-text { font-weight: 600; color: var(--text); font-size: .82rem; }
+.rp-hotel-address { font-size: .74rem; opacity: .75; margin-top: .1rem; line-height: 1.4; }
+.rp-hotel-dist { font-size: .7rem; color: var(--lc); margin-top: .2rem; font-weight: 600; }
+
+/* Rating bar */
+.rp-hotel-rating-row {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+.rp-hotel-score {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--lc);
+  flex-shrink: 0;
+}
+.rp-hotel-score-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.rp-hotel-score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--lc), #5ec4b4);
+  border-radius: 3px;
+  transition: width .6s ease;
+}
+.rp-hotel-score-label { font-size: .62rem; color: var(--text-muted); flex-shrink: 0; }
+
+/* Amenities chips */
+.rp-hotel-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+.rp-amenity-chip {
+  font-size: .65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .2rem .6rem;
+}
+
+/* Price row */
+.rp-hotel-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .75rem .9rem;
+  margin-top: .1rem;
+}
+.rp-hotel-price-main {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.rp-hotel-price-main span { font-size: .72rem; font-weight: 500; color: var(--text-muted); margin-left: .2rem; }
+.rp-hotel-price-range { font-size: .68rem; color: var(--text-muted); margin-top: .15rem; }
+.rp-hotel-book-via {
+  font-size: .65rem;
+  color: var(--text-muted);
+  text-align: right;
+  line-height: 1.5;
+}
+.rp-hotel-book-via strong { color: var(--lc); font-size: .72rem; }
+
+.rp-hotel-why {
+  font-size: .78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: flex;
+  gap: .4rem;
+  align-items: flex-start;
+  padding-top: .35rem;
+  border-top: 1px solid var(--border);
+}
+.rp-hotel-why span { color: var(--lc); flex-shrink: 0; margin-top: 2px; }
+
+/* ── LIGHT THEME ─────────────────────────────────────────── */
+[data-theme="light"] .rp-route-card { background: #f8fffe; }
+[data-theme="light"] .rp-hotel-card { background: #f8fffe; }
+[data-theme="light"] .rp-local-item { background: #f0faf8; }
+[data-theme="light"] .rp-hotel-price-row { background: #f0faf8; }
+
+/* ── MOBILE ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .rp-transport-tabs { padding: 0; }
+  .rp-trans-tab { min-width: 80px; padding: .65rem .85rem; }
+  .rp-trans-panel { padding: .65rem .75rem; gap: .6rem; }
+  .rp-route-card { padding: .85rem .75rem; gap: .55rem; }
+  .rp-route-name { font-size: .86rem; }
+  .rp-route-station { font-size: .74rem; }
+  .rp-route-station-label { font-size: .56rem; }
+  .rp-route-duration { font-size: .62rem; padding: .15rem .5rem; }
+  .rp-local-grid { grid-template-columns: repeat(3, 1fr); gap: .45rem; }
+  .rp-local-item { padding: .6rem .4rem; }
+  .rp-local-mode { font-size: .65rem; }
+  .rp-local-cost { font-size: .62rem; }
+  .rp-local-tip { display: none; }
+
+  .rp-hotels-grid {
+    grid-template-columns: 1fr;
+    padding: .75rem;
+    gap: .75rem;
+  }
+  .rp-hotel-card { padding: .9rem; gap: .55rem; }
+  .rp-hotel-name { font-size: .95rem; }
+  .rp-hotel-score { font-size: 1rem; }
+  .rp-hotel-price-main { font-size: 1rem; }
+  .rp-transport-summary { font-size: .8rem; padding: .65rem .85rem .4rem; }
+}
