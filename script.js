@@ -1,1607 +1,6443 @@
 /* ============================================================
-   PLAN YOUR TRIP INDIA — Complete JavaScript
-   AI Chatbot · Clickable India Map · Light/Dark Theme
+   PLAN YOUR TRIP INDIA — Complete Mobile-First CSS
    ============================================================ */
 
-// ─── STATE ──────────────────────────────────────────────────────
-let travelerCount = 2;
-let currentCityKey = '';
-let currentStateClicked = '';
-let indiaMapInstance = null;
-let stateLayer = null;
-let deferredInstallPrompt = null;
+/* ── TOKENS — DARK THEME — Deep Jade ── */
+:root,
+[data-theme="dark"] {
+  --uv: #ABD1C6;
+  --uv-dark: #7aada0;
+  --uv-deeper: #4d8a7c;
+  --uv-light: #c8e4de;
+  --uv-mist: rgba(171, 209, 198, 0.18);
+  --lc: #ABD1C6;
+  --lc-light: #c8e4de;
+  --lc-dim: rgba(171, 209, 198, 0.13);
+  --lc-border: rgba(171, 209, 198, 0.26);
+  --lc-glow: rgba(171, 209, 198, 0.20);
+  --bg: #0a1412;
+  --bg-2: #101e1b;
+  --bg-3: #162824;
+  --bg-card: #101e1b;
+  --text: #e8f5f2;
+  --text-muted: #9dc4bc;
+  --text-dim: #5e9589;
+  --gold: var(--lc);
+  --gold-light: var(--lc-light);
+  --gold-dim: var(--lc-dim);
+  --border: rgba(171, 209, 198, 0.12);
+  --border-hover: rgba(171, 209, 198, 0.30);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
+  --shadow-sm: 0 6px 24px rgba(0, 0, 0, 0.45);
+  --shadow-uv: 0 8px 28px rgba(171, 209, 198, 0.20);
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-bg: rgba(10, 20, 18, 0.97);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --purple: #50a089;
+  --purple-2: #50a089;
+  --purple-3: #50a089;
+  --purple-glow: rgba(171, 209, 198, 0.25);
+  --accent: var(--lc);
+}
 
-// chatHistory holds only live conversation turns.
-// System prompt is handled by the backend proxy.
-let chatHistory = [];
+/* ══════════════════════════════════════════
+   LIGHT THEME — Soft Jade × Cloud White
+   #ABD1C6 (jade) · #FAFAFA (cloud white)
+   ══════════════════════════════════════════ */
+[data-theme="light"] {
+  --uv: #3a8c7e;
+  --uv-dark: #2d6e63;
+  --uv-deeper: #1f5048;
+  --uv-light: #5aaa9c;
+  --uv-mist: rgba(171, 209, 198, 0.20);
+  --lc: #2d6e63;
+  --lc-light: #1f5048;
+  --lc-dim: rgba(171, 209, 198, 0.22);
+  --lc-border: rgba(171, 209, 198, 0.55);
+  --lc-glow: rgba(171, 209, 198, 0.30);
+  --bg: #FAFAFA;
+  --bg-2: #f0f9f7;
+  --bg-3: #dff0ec;
+  --bg-card: #FAFAFA;
+  --text: #6aada0;
+  --text-muted: #2d6e63;
+  --text-dim: #6aada0;
+  --gold: #2d6e63;
+  --gold-light: #1f5048;
+  --gold-dim: rgba(171, 209, 198, 0.22);
+  --border: rgba(171, 209, 198, 0.40);
+  --border-hover: rgba(171, 209, 198, 0.70);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 24px 70px rgba(171, 209, 198, 0.20);
+  --shadow-sm: 0 6px 24px rgba(171, 209, 198, 0.15);
+  --shadow-uv: 0 8px 28px rgba(58, 140, 126, 0.25);
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-bg: rgba(250, 250, 250, 0.97);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --purple: var(--uv);
+  --purple-2: var(--uv-light);
+  --purple-3: var(--uv-light);
+  --purple-glow: rgba(58, 140, 126, 0.20);
+  --accent: #3a8c7e;
+}
 
-// ─── CURRENT LOCATION ────────────────────────────────────────────
-function useCurrentLocation() {
-    const btn = document.getElementById('useLocationBtn');
-    const btnText = document.getElementById('locationBtnText');
-    const fromInput = document.getElementById('wizFromInput');
+/* ── Light theme component overrides ── */
+[data-theme="light"] body {
+  background: var(--bg);
+  color: var(--text);
+}
 
-    if (!navigator.geolocation) {
-        showToast('Geolocation is not supported by your browser.', 'error');
-        return;
-    }
+[data-theme="light"] .leaflet-container {
+  background: #dff0ec !important;
+}
 
-    btn.classList.add('loading');
-    btnText.textContent = 'Detecting...';
+[data-theme="light"] .leaflet-control-zoom a {
+  background: #FAFAFA !important;
+  color: #0f2e28 !important;
+  border-color: rgba(171, 209, 198, 0.45) !important;
+}
 
-    navigator.geolocation.getCurrentPosition(
-        async (position) => {
-            const { latitude, longitude } = position.coords;
-            try {
-                const res = await fetch(
-                    `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=10&addressdetails=1`
-                );
-                const data = await res.json();
-                const addr = data.address || {};
-                const city = addr.city
-                    || addr.town
-                    || addr.municipality
-                    || addr.village
-                    || addr.suburb
-                    || addr.county
-                    || '';
+[data-theme="light"] .state-tooltip {
+  background: #FAFAFA;
+  color: #0f2e28;
+  border-color: rgba(171, 209, 198, 0.45);
+}
 
-                if (city) {
-                    fromInput.value = city;
-                    showToast(`📍 From set to: ${city}`, 'success');
-                } else {
-                    fromInput.value = '';
-                    showToast('📍 Could not detect city. Please type it manually.', 'error');
-                }
-            } catch (e) {
-                fromInput.value = '';
-                showToast('📍 Location error. Please type your city.', 'error');
-            }
-            btn.classList.remove('loading');
-            btnText.textContent = '✓ City Detected';
-            setTimeout(() => { btnText.textContent = '📍 Detect My City (sets From)'; }, 3000);
-        },
-        (err) => {
-            btn.classList.remove('loading');
-            btnText.textContent = '📍 Detect My City (sets From)';
-            const msgs = {
-                1: 'Location access denied. Please allow location in your browser.',
-                2: 'Unable to detect location. Check GPS/network.',
-                3: 'Location request timed out. Please try again.'
-            };
-            showToast(msgs[err.code] || 'Could not get location.', 'error');
-        },
-        { timeout: 10000, enableHighAccuracy: false }
-    );
+[data-theme="light"] .nav-mobile-overlay {
+  background: rgba(250, 250, 250, .98);
+}
+
+[data-theme="light"] .nav-link {
+  color: #000000;
+}
+
+[data-theme="light"] .nav-link:hover {
+  color: #0f2e28;
+  background: rgba(171, 209, 198, 0.18);
+}
+
+[data-theme="light"] .nav-link.active {
+  color: #6fd3c4;
+}
+
+[data-theme="light"] .hamburger span {
+  background: #2d6e63;
+}
+
+[data-theme="light"] .nav-logo {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .btn-nav-login {
+  color: #86bcb3;
+  border-color: rgba(171, 209, 198, 0.60);
+  background: transparent;
+}
+
+[data-theme="light"] .btn-nav-login:hover {
+  border-color: #93bfb8;
+  color: #233f39;
+}
+
+[data-theme="light"] .btn-nav-signup {
+  background: #ABD1C6;
+  color: #0f2e28;
+  box-shadow: 0 3px 14px rgba(171, 209, 198, 0.50);
+  font-weight: 700;
+}
+
+[data-theme="light"] .btn-nav-signup:hover {
+  background: #3a8c7e;
+  color: #FAFAFA;
+}
+
+[data-theme="light"] #navbar.scrolled {
+  background: var(--nav-bg);
+  box-shadow: 0 1px 0 rgba(171, 209, 198, 0.45);
+}
+
+[data-theme="light"] .hero-overlay {
+  background:
+    linear-gradient(to right, rgba(15, 46, 40, .85) 0%, rgba(58, 140, 126, .45) 52%, rgba(171, 209, 198, .10) 100%),
+    linear-gradient(to top, rgba(15, 46, 40, .70) 0%, transparent 50%);
+}
+
+/* stat colors handled in main light theme block below */
+
+[data-theme="light"] .section-label-tag {
+  background: rgba(171, 209, 198, 0.25);
+  border-color: rgba(171, 209, 198, 0.60);
+  color: #2d6e63;
+}
+
+[data-theme="light"] .section-title-main {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .section-title-main em {
+  color: #3a8c7e;
+}
+
+[data-theme="light"] .section-sub-text {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .india-map-container {
+  border-color: rgba(171, 209, 198, 0.40);
+  background: #dff0ec;
+}
+
+[data-theme="light"] .india-map-panel {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.40);
+}
+
+[data-theme="light"] .map-hint-chips span {
+  background: #dff0ec;
+  border-color: rgba(171, 209, 198, 0.50);
+  color: #2d6e63;
+}
+
+[data-theme="light"] .map-hint-chips span:hover {
+  border-color: #3a8c7e;
+  color: #0f2e28;
+  background: rgba(171, 209, 198, 0.30);
+}
+
+[data-theme="light"] .btn-map-plan {
+  background: #ABD1C6;
+  color: #0f2e28;
+  font-weight: 700;
+}
+
+[data-theme="light"] .btn-map-chat {
+  background: #dff0ec;
+  border-color: rgba(171, 209, 198, 0.50);
+  color: #0f2e28;
+}
+
+[data-theme="light"] .ai-typing-dots span {
+  background: #3a8c7e;
+}
+
+[data-theme="light"] .map-result-header {
+  border-color: rgba(171, 209, 198, 0.40);
+}
+
+[data-theme="light"] .map-result-actions {
+  border-color: rgba(171, 209, 198, 0.40);
+}
+
+[data-theme="light"] .map-outer-section {
+  background: #f0f9f7;
+}
+
+[data-theme="light"] .form-field input,
+[data-theme="light"] .form-field select,
+[data-theme="light"] .form-input {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.55);
+  color: #0f2e28;
+}
+
+[data-theme="light"] .form-field input:focus,
+[data-theme="light"] .form-field select:focus,
+[data-theme="light"] .form-input:focus {
+  border-color: #3a8c7e;
+  box-shadow: 0 0 0 3px rgba(171, 209, 198, .25);
+}
+
+[data-theme="light"] .form-field input::placeholder,
+[data-theme="light"] .form-input::placeholder {
+  color: #6aada0;
+}
+
+[data-theme="light"] .form-field label {
+  color: #2d6e63;
+}
+
+[data-theme="light"] select option {
+  background: #FAFAFA;
+  color: #0f2e28;
+}
+
+[data-theme="light"] .travelers-control {
+  background: #f0f9f7;
+  border-color: rgba(171, 209, 198, 0.45);
+}
+
+[data-theme="light"] .trav-btn {
+  background: #dff0ec;
+  border-color: rgba(171, 209, 198, 0.45);
+  color: #0f2e28;
+}
+
+[data-theme="light"] .trav-btn:hover {
+  background: #ABD1C6;
+  color: #0f2e28;
+  border-color: #ABD1C6;
+}
+
+[data-theme="light"] #travCount {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .trav-label {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .btn-primary {
+  background: #ABD1C6;
+  color: #0f2e28;
+  box-shadow: 0 4px 20px rgba(171, 209, 198, .45);
+  font-weight: 700;
+}
+
+[data-theme="light"] .btn-primary:hover {
+  background: #3a8c7e;
+  color: #FAFAFA;
+}
+
+[data-theme="light"] .btn-ghost {
+  border-color: rgba(255, 255, 255, .60);
+  color: #fff;
+}
+
+[data-theme="light"] .result-card {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.40);
+}
+
+[data-theme="light"] .result-card h4 {
+  color: #2d6e63;
+  border-color: rgba(171, 209, 198, 0.35);
+}
+
+[data-theme="light"] .result-card ul li {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .result-card ul li::before {
+  color: #3a8c7e;
+}
+
+[data-theme="light"] .day-plan-item {
+  border-color: rgba(171, 209, 198, 0.35);
+}
+
+[data-theme="light"] .day-plan-item strong {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .day-plan-item p {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .budget-row span:first-child {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .budget-row span:last-child {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .budget-row.total span {
+  color: #3a8c7e;
+  font-weight: 700;
+}
+
+[data-theme="light"] .btn-reset {
+  background: #f0f9f7;
+  border-color: rgba(171, 209, 198, 0.45);
+  color: #2d6e63;
+}
+
+[data-theme="light"] .btn-reset:hover {
+  border-color: #3a8c7e;
+  color: #0f2e28;
+}
+
+[data-theme="light"] .results-topbar h3 {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .result-subtitle {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .place-card {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.38);
+}
+
+[data-theme="light"] .place-badge {
+  background: #ABD1C6;
+  color: #0f2e28;
+  font-weight: 700;
+}
+
+[data-theme="light"] .place-info h3 {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .place-info p {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .feature-card {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.38);
+}
+
+[data-theme="light"] .feature-card:hover {
+  border-color: rgba(171, 209, 198, 0.70);
+  box-shadow: 0 8px 28px rgba(171, 209, 198, .22);
+}
+
+[data-theme="light"] .feature-icon {
+  background: rgba(171, 209, 198, 0.25);
+  border-color: rgba(171, 209, 198, 0.55);
+  color: #2d6e63;
+}
+
+[data-theme="light"] .feature-card h3 {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .feature-card p {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .about-section {
+  background: #f0f9f7;
+}
+
+[data-theme="light"] .about-text p {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .about-value {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .value-dot {
+  background: #ABD1C6;
+}
+
+[data-theme="light"] .about-img-grid img {
+  border-color: rgba(171, 209, 198, 0.40);
+}
+
+[data-theme="light"] .contact-section {
+  background: #FAFAFA;
+}
+
+[data-theme="light"] .contact-icon {
+  background: rgba(171, 209, 198, 0.22);
+  border-color: rgba(171, 209, 198, 0.50);
+}
+
+[data-theme="light"] .contact-item strong {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .contact-item p {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .footer {
+  background: #0f2e28;
+  border-top-color: rgba(171, 209, 198, 0.20);
+}
+
+[data-theme="light"] .footer-bottom {
+  border-top-color: rgba(171, 209, 198, 0.15);
+}
+
+[data-theme="light"] .footer-bottom p {
+  color: rgba(171, 209, 198, 0.65);
+}
+
+[data-theme="light"] .footer-logo {
+  color: #ABD1C6;
+}
+
+[data-theme="light"] .footer-brand p {
+  color: rgba(171, 209, 198, 0.70);
+}
+
+[data-theme="light"] .footer-col h4 {
+  color: #ABD1C6;
+}
+
+[data-theme="light"] .footer-col ul li a {
+  color: rgba(171, 209, 198, 0.70);
+}
+
+[data-theme="light"] .footer-col ul li a:hover {
+  color: #ABD1C6;
+}
+
+[data-theme="light"] .footer-col p {
+  color: rgba(171, 209, 198, 0.70);
+}
+
+[data-theme="light"] .social-btn {
+  background: rgba(171, 209, 198, 0.10);
+  border-color: rgba(171, 209, 198, 0.25);
+  color: #ABD1C6;
+}
+
+[data-theme="light"] .social-btn:hover {
+  background: #ABD1C6;
+  color: #0f2e28;
+  border-color: #ABD1C6;
+}
+
+[data-theme="light"] .auth-modal-backdrop {
+  background: rgba(15, 46, 40, .60);
+  backdrop-filter: blur(14px);
+}
+
+[data-theme="light"] .auth-modal {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.40);
+  box-shadow: 0 -20px 60px rgba(171, 209, 198, .18);
+}
+
+[data-theme="light"] .auth-modal-glow {
+  background: linear-gradient(90deg, #ABD1C6, #3a8c7e, #FAFAFA, #3a8c7e, #ABD1C6);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+[data-theme="light"] .auth-close {
+  background: #dff0ec;
+  border-color: rgba(171, 209, 198, 0.45);
+  color: #2d6e63;
+}
+
+[data-theme="light"] .auth-close:hover {
+  background: rgba(171, 209, 198, 0.30);
+  color: #0f2e28;
+}
+
+[data-theme="light"] .auth-logo-wrap h2 {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .auth-logo-wrap p {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .auth-logo-icon {
+  background: linear-gradient(135deg, #ABD1C6, #3a8c7e);
+}
+
+[data-theme="light"] .auth-field label {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .auth-input {
+  background: #f0f9f7;
+  border-color: rgba(171, 209, 198, 0.50);
+  color: #0f2e28;
+}
+
+[data-theme="light"] .auth-input:focus {
+  border-color: #3a8c7e;
+  box-shadow: 0 0 0 3px rgba(171, 209, 198, .20);
+}
+
+[data-theme="light"] .auth-input::placeholder {
+  color: #6aada0;
+}
+
+[data-theme="light"] .auth-input-icon {
+  color: #6aada0;
+}
+
+[data-theme="light"] .auth-input-wrap:focus-within .auth-input-icon {
+  color: #3a8c7e;
+}
+
+[data-theme="light"] .auth-pw-toggle {
+  color: #6aada0;
+}
+
+[data-theme="light"] .auth-forgot a {
+  color: #3a8c7e;
+}
+
+[data-theme="light"] .auth-submit {
+  background: linear-gradient(135deg, #ABD1C6, #3a8c7e);
+  color: #0f2e28;
+  box-shadow: 0 4px 20px rgba(171, 209, 198, .35);
+  font-weight: 700;
+}
+
+[data-theme="light"] .auth-submit:hover {
+  box-shadow: 0 8px 28px rgba(171, 209, 198, .50);
+}
+
+[data-theme="light"] .auth-submit-loader span {
+  background: #0f2e28;
+}
+
+[data-theme="light"] .auth-divider {
+  color: #6aada0;
+}
+
+[data-theme="light"] .auth-divider::before,
+[data-theme="light"] .auth-divider::after {
+  background: rgba(171, 209, 198, 0.38);
+}
+
+[data-theme="light"] .auth-social-btn {
+  background: #f0f9f7;
+  border-color: rgba(171, 209, 198, 0.45);
+  color: #2d6e63;
+}
+
+[data-theme="light"] .auth-social-btn:hover {
+  border-color: rgba(171, 209, 198, 0.70);
+  color: #0f2e28;
+  background: #dff0ec;
+}
+
+[data-theme="light"] .auth-switch {
+  border-top-color: rgba(171, 209, 198, 0.30);
+}
+
+[data-theme="light"] .auth-switch p {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .auth-switch a {
+  color: #3a8c7e;
+  font-weight: 700;
+}
+
+[data-theme="light"] .auth-terms {
+  color: #6aada0;
+}
+
+[data-theme="light"] .auth-terms a {
+  color: #3a8c7e;
+}
+
+[data-theme="light"] input:-webkit-autofill,
+[data-theme="light"] input:-webkit-autofill:hover,
+[data-theme="light"] input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #f0f9f7 inset;
+  -webkit-text-fill-color: #0f2e28;
+}
+
+[data-theme="light"] .chatbot-btn {
+  background: linear-gradient(135deg, #ABD1C6, #3a8c7e);
+  color: #0f2e28;
+  border-color: rgba(171, 209, 198, .50);
+  box-shadow: 0 8px 26px rgba(171, 209, 198, .40);
+  font-weight: 700;
+}
+
+[data-theme="light"] .chatbot-btn:hover {
+  box-shadow: 0 12px 36px rgba(171, 209, 198, .55);
+}
+
+[data-theme="light"] .chat-notif {
+  border-color: #FAFAFA;
+}
+
+[data-theme="light"] .chatbot-window {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.40);
+  box-shadow: 0 24px 70px rgba(171, 209, 198, .22);
+}
+
+[data-theme="light"] .chat-header {
+  background: linear-gradient(135deg, #0f2e28, #3a8c7e);
+}
+
+[data-theme="light"] .chat-close {
+  background: rgba(250, 250, 250, .20);
+}
+
+[data-theme="light"] .chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(171, 209, 198, 0.45);
+}
+
+[data-theme="light"] .msg-content {
+  background: #f0f9f7;
+  border-color: rgba(171, 209, 198, 0.35);
+  color: #0f2e28;
+}
+
+[data-theme="light"] .chat-msg.user .msg-content {
+  background: linear-gradient(135deg, #ABD1C6, #3a8c7e);
+  color: #0f2e28;
+  border: none;
+  font-weight: 600;
+}
+
+[data-theme="light"] .chat-input-area {
+  border-top-color: rgba(171, 209, 198, 0.35);
+}
+
+[data-theme="light"] .chat-suggestions button {
+  background: #dff0ec;
+  border-color: rgba(171, 209, 198, 0.45);
+  color: #2d6e63;
+}
+
+[data-theme="light"] .chat-suggestions button:hover {
+  border-color: #3a8c7e;
+  color: #0f2e28;
+  background: #ABD1C6;
+}
+
+[data-theme="light"] #chatInput {
+  background: #dff0ec;
+  border-color: rgba(171, 209, 198, 0.45);
+  color: #0f2e28;
+}
+
+[data-theme="light"] #chatInput::placeholder {
+  color: #6aada0;
+}
+
+[data-theme="light"] #chatInput:focus {
+  border-color: #3a8c7e;
+}
+
+[data-theme="light"] .chat-send {
+  background: linear-gradient(135deg, #ABD1C6, #3a8c7e);
+  color: #0f2e28;
+  border-color: rgba(171, 209, 198, .50);
+}
+
+[data-theme="light"] .toast {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.40);
+  color: #0f2e28;
+  box-shadow: 0 6px 24px rgba(171, 209, 198, .20);
+}
+
+[data-theme="light"] .loader-bar {
+  background: rgba(171, 209, 198, .22);
+}
+
+[data-theme="light"] #loader {
+  background: linear-gradient(135deg, #0f2e28 0%, #3a8c7e 55%, #ABD1C6 100%);
+}
+
+[data-theme="light"] .loader-text {
+  color: #FAFAFA;
+}
+
+[data-theme="light"] #welcomeOverlay {
+  background: linear-gradient(135deg, #0f2e28 0%, #3a8c7e 55%, #ABD1C6 100%);
+}
+
+[data-theme="light"] .city-hero {
+  background: linear-gradient(135deg, #0f2e28, #3a8c7e);
+}
+
+[data-theme="light"] .city-tab {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .city-tab:hover {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .city-tab.active {
+  color: #2d6e63;
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.40);
+  border-bottom-color: #FAFAFA;
+}
+
+[data-theme="light"] .city-tabs {
+  border-bottom-color: rgba(171, 209, 198, 0.35);
+}
+
+[data-theme="light"] .city-info-card {
+  background: #FAFAFA;
+  border-color: rgba(171, 209, 198, 0.38);
+}
+
+[data-theme="light"] .city-info-card h4 {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .city-info-card p {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .city-badge-hero {
+  background: #ABD1C6;
+  color: #0f2e28;
+  font-weight: 700;
+}
+
+[data-theme="light"] .city-info-card .price-tag {
+  background: rgba(171, 209, 198, 0.22);
+  color: #2d6e63;
+}
+
+.planner-outer-section {
+  position: relative;
+  padding: 0 0 6rem;
+  background-image: url('in13.jpeg');
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  isolation: isolate;
+}
+
+.planner-outer-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+      rgba(4, 12, 28, 0.60) 0%,
+      rgba(4, 12, 28, 0.42) 25%,
+      rgba(4, 12, 28, 0.42) 75%,
+      rgba(4, 12, 28, 0.72) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.planner-photo-banner,
+.wizard-card,
+.planner-section-fade-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f0f9f7;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(171, 209, 198, .45);
+}
+
+[data-theme="light"] :focus-visible {
+  outline-color: #3a8c7e;
+}
+
+/* ── RESET ── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--uv-mist);
+  border-radius: 99px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lc);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-2) inset;
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+}
+
+/* ── LOADER ── */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, var(--uv) 0%, var(--uv-dark) 60%, var(--bg) 100%);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .6s, visibility .6s;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#loader.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+#loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  display: none;
+}
+
+.loader-inner {
+  text-align: center;
+}
+
+.loader-chakra {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 1.5rem;
+  animation: spin 8s linear infinite;
+}
+
+.loader-chakra svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 4px;
+  color: var(--lc);
+  margin-bottom: 1.5rem;
+}
+
+.loader-bar {
+  width: 180px;
+  height: 2px;
+  background: rgba(254, 250, 205, .18);
+  border-radius: 99px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.loader-bar span {
+  display: block;
+  height: 100%;
+  background: var(--lc);
+  border-radius: 99px;
+  animation: loadFill 2s ease-out forwards;
+}
+
+@keyframes loadFill {
+  0% {
+    width: 0%
+  }
+
+  100% {
+    width: 100%
+  }
+}
+
+/* ═══════════════════════════════
+   NAVBAR — Mobile First
+   ═══════════════════════════════ */
+#navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: calc(.75rem + var(--safe-top)) 0 .75rem;
+  transition: all var(--transition);
+}
+
+#navbar.scrolled {
+  background: var(--nav-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.nav-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--lc);
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  z-index: 1001;
+  position: relative;
+}
+
+.nav-logo img.logo-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--uv-deeper), var(--uv));
+  border: 2px solid var(--lc);
+  box-shadow: 0 0 10px rgba(171, 209, 198, 0.45), 0 0 20px rgba(171, 209, 198, 0.2);
+  padding: 3px;
+  object-fit: contain;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.nav-logo:hover img.logo-img {
+  box-shadow: 0 0 16px rgba(171, 209, 198, 0.7), 0 0 32px rgba(171, 209, 198, 0.35);
+  transform: rotate(8deg) scale(1.08);
+}
+
+.logo-gem {
+  font-size: .75rem;
+  opacity: .8;
+}
+
+/* Desktop links — hidden on mobile */
+.nav-links {
+  display: none;
+  align-items: center;
+  gap: .1rem;
+  margin-left: auto;
+}
+
+.nav-link {
+  padding: .4rem .7rem;
+  border-radius: 6px;
+  font-size: .82rem;
+  font-weight: 500;
+  color: whitesmoke;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: var(--border);
+}
+
+.nav-link.active {
+  color: var(--lc);
+}
+
+/* Desktop auth — hidden on mobile */
+.nav-actions {
+  display: none;
+  align-items: center;
+  gap: .5rem;
+  margin-left: .5rem;
+}
+
+.btn-nav-login {
+  padding: .38rem .85rem;
+  border-radius: 6px;
+  border: 1.5px solid var(--lc-border);
+  color: var(--text-muted);
+  font-size: .78rem;
+  font-weight: 500;
+  background: transparent;
+  transition: all var(--transition);
+  min-height: 36px;
+}
+
+.btn-nav-login:hover {
+  border-color: var(--lc);
+  color: var(--lc);
+}
+
+.btn-nav-signup {
+  padding: .38rem .85rem;
+  border-radius: 6px;
+  background: var(--lc);
+  color: black;
+  font-size: .78rem;
+  font-weight: 700;
+  box-shadow: 0 3px 14px var(--lc-glow);
+  transition: all var(--transition);
+  min-height: 36px;
+}
+
+.btn-nav-signup:hover {
+  background: var(--lc-light);
+}
+
+.nav-user-badge {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .28rem .75rem;
+  border-radius: 99px;
+  background: var(--bg-3);
+  border: 1px solid var(--lc-border);
+  font-size: .78rem;
+}
+
+.nav-user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--uv), var(--lc));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .68rem;
+  font-weight: 700;
+  color: var(--uv-deeper);
+}
+
+/* Hamburger — mobile only */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: .3rem;
+  z-index: 1001;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--lc);
+  border-radius: 99px;
+  transition: all var(--transition);
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile fullscreen overlay */
+.nav-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(15, 12, 26, .97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .28s ease, visibility .28s ease;
+  padding: calc(70px + var(--safe-top)) 2rem calc(2rem + var(--safe-bottom));
+  gap: 0;
+}
+
+.nav-mobile-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+.nav-mobile-overlay .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+  padding: .9rem 2rem;
+  width: 100%;
+  text-align: center;
+  border-radius: 10px;
+  min-height: 52px;
+  border: none;
+  background: none;
+}
+
+.nav-mobile-overlay .nav-link:active,
+.nav-mobile-overlay .nav-link.active {
+  color: var(--lc);
+  background: rgba(254, 250, 205, .06);
+}
+
+.nav-mobile-divider {
+  width: 40px;
+  height: 1px;
+  background: var(--border);
+  margin: .75rem 0;
+}
+
+.nav-mobile-auth {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  width: 100%;
+  max-width: 240px;
+}
+
+.nav-mobile-auth .btn-nav-login,
+.nav-mobile-auth .btn-nav-signup {
+  width: 100%;
+  min-height: 48px;
+  padding: .75rem;
+  font-size: .93rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ═════════════════
+   HERO
+   ═════════════════ */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  /* Fallback gradient shown instantly while image loads */
+  background: linear-gradient(135deg, #081c3c 0%, #0a2348 35%, #0f2e28 70%, #0a1412 100%);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* never block content */
+.hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  transform: scale(1.05);
+  animation: heroZoom 12s ease-out forwards;
+  pointer-events: none;
+  display: block;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+@keyframes heroZoom {
+  to {
+    transform: scale(1);
+  }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    linear-gradient(to right, rgba(8, 28, 60, .92) 0%, rgba(10, 35, 75, .55) 52%, rgba(0, 0, 0, .2) 100%),
+    linear-gradient(to top, rgba(0, 0, 0, .78) 0%, transparent 52%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  min-height: 100svh;
+  padding: calc(80px + var(--safe-top)) 1.25rem calc(2.5rem + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  gap: .85rem;
+  pointer-events: auto;
+}
+
+.hero-greeting {
+  font-size: .88rem;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, .72);
+  font-weight: 300;
+  display: none;
+}
+
+.hero-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.8rem, 14vw, 7rem);
+  line-height: .95;
+  color: #fff;
+  letter-spacing: 2px;
+}
+
+.headline-accent {
+  color: var(--lc);
+}
+
+.hero-sub {
+  font-size: .9rem;
+  color: rgba(255, 255, 255, .7);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+.hero-cta {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  width: 100%;
+  max-width: 300px;
+  margin-top: .25rem;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.hero-cta a,
+.hero-cta button {
+  -webkit-tap-highlight-color: rgba(254, 250, 205, 0.15);
+  touch-action: manipulation;
+  position: relative;
+  z-index: 10;
+}
+
+.scroll-indicator {
+  display: none;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .85rem 1.5rem;
+  border-radius: 10px;
+  background: var(--lc);
+  color: #0f2e28;
+  font-weight: 700;
+  font-size: .92rem;
+  letter-spacing: .3px;
+  transition: all var(--transition);
+  box-shadow: 0 4px 20px var(--lc-glow);
+  min-height: 50px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn-primary:hover {
+  background: var(--lc-light);
+}
+
+.btn-primary:active {
+  transform: scale(.97);
+  background: var(--lc-light);
+}
+
+.btn-primary.full {
+  width: 100%;
+}
+
+.btn-ghost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .85rem 1.5rem;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, .4);
+  color: #fff;
+  font-weight: 500;
+  font-size: .92rem;
+  transition: all var(--transition);
+  backdrop-filter: blur(8px);
+  min-height: 50px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, .8);
+  background: rgba(255, 255, 255, .1);
+}
+
+.btn-ghost:active {
+  transform: scale(.97);
+  background: rgba(255, 255, 255, .15);
+}
+
+/* ── STATS ── */
+.stats-strip {
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.stat-item {
+  text-align: center;
+  padding: .85rem .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .18rem;
+  border: 1px solid var(--border);
+}
+
+.stat-item strong {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  color: var(--lc);
+}
+
+.stat-item span {
+  font-size: .66rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.stat-divider {
+  display: none;
+}
+
+/* ── SECTION COMMONS ── */
+.section,
+.map-outer-section {
+  padding: 5rem 0;
+  position: relative;
+  width: 100%;
+}
+
+/* ── PLANNER PHOTO BANNER ── */
+.planner-photo-banner {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  margin-bottom: 0;
+  padding: 4rem 1.25rem 3rem;
+  z-index: 2;
+}
+
+.planner-banner-img {
+  display: none;
+  /* hidden — parallax bg replaces this */
+}
+
+.planner-banner-overlay {
+  position: relative;
+  inset: unset;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0;
+}
+
+.planner-banner-overlay .section-title-main {
+  margin-bottom: .5rem;
+  color: #fff;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+}
+
+.planner-banner-overlay .section-label-tag {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(171, 209, 198, 0.45);
+}
+
+.planner-banner-overlay .section-sub-text {
+  color: rgba(255, 255, 255, 0.78);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ── DESTINATION WITH LOCATION BTN ── */
+.destination-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.destination-input-wrap input {
+  width: 100%;
+}
+
+.btn-use-location {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem .9rem;
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  border-radius: 8px;
+  color: var(--lc);
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .5px;
+  cursor: pointer;
+  transition: all .2s ease;
+  width: fit-content;
+}
+
+.btn-use-location:hover {
+  background: var(--lc-dim);
+  border-color: var(--lc);
+  transform: translateY(-1px);
+}
+
+.btn-use-location svg {
+  flex-shrink: 0;
+}
+
+.btn-use-location.loading {
+  opacity: .7;
+  pointer-events: none;
+}
+
+/* planner-outer-section defined below */
+
+.section-header-wrap {
+  text-align: center;
+  margin-bottom: 2rem;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.25rem;
+}
+
+.section-label-tag {
+  display: inline-block;
+  padding: .28rem .85rem;
+  border-radius: 99px;
+  background: var(--lc-dim);
+  border: 1px solid var(--lc-border);
+  color: var(--lc);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: .75rem;
+}
+
+.section-title-main {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.6rem, 6vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: .75rem;
+}
+
+.section-title-main em {
+  color: var(--lc);
+  font-style: italic;
+}
+
+.section-sub-text {
+  color: var(--text-muted);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.7;
+  font-size: .88rem;
+}
+
+/* ── INDIA MAP ── */
+.map-outer-section {
+  background: var(--bg-2);
+}
+
+.india-map-layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.india-map-container {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  height: 420px;
+  overflow: hidden;
+  touch-action: pan-x pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+}
+
+#indiaMap {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.leaflet-container {
+  background: var(--bg-3) !important;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid var(--border) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--bg-2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.state-tooltip {
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: .75rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.india-map-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+}
+
+.map-panel-default {
+  text-align: center;
+  margin: auto;
+}
+
+.map-pin-bounce {
+  font-size: 1.8rem;
+  margin-bottom: .75rem;
+  animation: pinBounce 2s ease-in-out infinite;
+}
+
+@keyframes pinBounce {
+
+  0%,
+  100% {
+    transform: translateY(0)
+  }
+
+  50% {
+    transform: translateY(-8px)
+  }
+}
+
+.map-panel-default h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  margin-bottom: .5rem;
+}
+
+.map-panel-default p {
+  color: var(--text-muted);
+  font-size: .83rem;
+  line-height: 1.65;
+}
+
+.map-hint-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  justify-content: center;
+  margin-top: .85rem;
+}
+
+.map-hint-chips span {
+  padding: .4rem .85rem;
+  border-radius: 99px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: .76rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.map-hint-chips span:hover,
+.map-hint-chips span:active {
+  border-color: var(--lc);
+  color: var(--lc);
+}
+
+.map-panel-result {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.map-result-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.map-result-flag {
+  font-size: 1.5rem;
+}
+
+.map-result-header h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+}
+
+.map-state-tagline {
+  color: var(--text-muted);
+  font-size: .8rem;
+  margin-top: .15rem;
+}
+
+.map-result-loading {
+  text-align: center;
+  padding: 1rem;
+}
+
+.map-result-loading p {
+  color: var(--text-muted);
+  font-size: .8rem;
+  margin-top: .5rem;
+}
+
+.ai-typing-dots {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.ai-typing-dots span {
+  width: 7px;
+  height: 7px;
+  background: var(--lc);
+  border-radius: 50%;
+  animation: aiDot 1.2s ease-in-out infinite;
+}
+
+.ai-typing-dots span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.ai-typing-dots span:nth-child(3) {
+  animation-delay: .4s;
+}
+
+@keyframes aiDot {
+
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: .5
+  }
+
+  50% {
+    transform: translateY(-6px);
+    opacity: 1
+  }
+}
+
+.map-result-content {
+  color: var(--text);
+  font-size: .83rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.map-result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--border);
+}
+
+.btn-map-chat,
+.btn-map-plan {
+  padding: .72rem 1rem;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 600;
+  transition: all var(--transition);
+  min-height: 46px;
+  width: 100%;
+}
+
+.btn-map-chat {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-map-chat:hover,
+.btn-map-chat:active {
+  border-color: var(--lc);
+  color: var(--lc);
+}
+
+.btn-map-plan {
+  background: var(--lc);
+  color: var(--uv);
+  font-weight: 700;
+  border: none;
+}
+
+.btn-map-plan:hover,
+.btn-map-plan:active {
+  background: var(--lc-light);
+}
+
+/* ── PLANNER ── */
+/* ══════════════════════════════════════
+   AI PLANNER — PARALLAX PHOTO SECTION
+   ══════════════════════════════════════ */
+.planner-outer-section {
+  position: relative;
+  padding: 0 0 6rem;
+  background-image: url('in13.jpeg');
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  isolation: isolate;
+}
+
+.planner-outer-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+      rgba(4, 12, 28, 0.60) 0%,
+      rgba(4, 12, 28, 0.42) 25%,
+      rgba(4, 12, 28, 0.42) 75%,
+      rgba(4, 12, 28, 0.72) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.planner-photo-banner,
+.wizard-card,
+.planner-section-fade-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+/* The actual photo — positioned absolutely, moves via JS */
+.planner-parallax-bg {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  right: 0;
+  bottom: -20%;
+  z-index: 0;
+  will-change: transform;
+}
+
+.planner-parallax-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  filter: brightness(0.55) saturate(1.2);
+}
+
+/* Dark gradient overlay so text/card stay readable */
+.planner-parallax-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      rgba(4, 12, 28, 0.55) 0%,
+      rgba(4, 12, 28, 0.35) 30%,
+      rgba(4, 12, 28, 0.35) 70%,
+      rgba(4, 12, 28, 0.75) 100%);
+  z-index: 1;
+}
+
+/* ── PLANNER PHOTO BANNER (header text area) ── */
+.planner-photo-banner {
+  width: 100%;
+  padding: 5rem 1.25rem 3rem;
+  text-align: center;
+}
+
+.planner-banner-img {
+  display: none;
+}
+
+.planner-banner-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+}
+
+.planner-banner-overlay .section-title-main {
+  color: #fff !important;
+  text-shadow: 0 3px 30px rgba(0, 0, 0, 0.7);
+  margin-bottom: .25rem;
+}
+
+.planner-banner-overlay .section-label-tag {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(171, 209, 198, 0.5) !important;
+  color: #ABD1C6 !important;
+}
+
+.planner-banner-overlay .section-sub-text {
+  color: rgba(255, 255, 255, 0.80) !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.planner-banner-overlay .section-label-tag {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(171, 209, 198, 0.45) !important;
+}
+
+.planner-banner-overlay .section-sub-text {
+  color: rgba(255, 255, 255, 0.78) !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ── WIZARD CARD ── */
+.wizard-card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  background: rgba(8, 16, 28, 0.75);
+  border: 1px solid rgba(171, 209, 198, 0.22);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 3;
+}
+
+/* ── WIZARD STEP BAR ── */
+.wiz-step-bar {
+  display: flex;
+  align-items: flex-start;
+  padding: 1.75rem 1.5rem 0;
+  margin-bottom: 1.75rem;
+}
+
+.wiz-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.wiz-step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 17px;
+  left: calc(50% + 18px);
+  right: calc(-50% + 18px);
+  height: 1px;
+  background: var(--border);
+  transition: background .4s ease;
+}
+
+.wiz-step-item.completed:not(:last-child)::after {
+  background: var(--lc);
+}
+
+.wiz-step-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--bg-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: all .3s cubic-bezier(.4, 0, .2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.wiz-step-item.active .wiz-step-circle {
+  background: var(--lc);
+  border-color: var(--lc);
+  color: var(--bg);
+  box-shadow: 0 0 0 5px var(--lc-dim);
+}
+
+.wiz-step-item.completed .wiz-step-circle {
+  background: rgba(34, 197, 94, .15);
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
+.wiz-step-label {
+  font-size: .6rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: .4rem;
+  font-weight: 500;
+  transition: color .3s;
+}
+
+.wiz-step-item.active .wiz-step-label {
+  color: var(--lc);
+}
+
+.wiz-step-item.completed .wiz-step-label {
+  color: #4ade80;
+}
+
+/* ── WIZARD PANELS ── */
+.wiz-panel {
+  display: none;
+  padding: 0 .5rem 1.5rem;
+  animation: wizSlideIn .35s cubic-bezier(.4, 0, .2, 1) both;
+}
+
+.wiz-panel.active {
+  display: block;
+}
+
+@keyframes wizSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.wiz-question {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: .35rem;
+  line-height: 1.2;
+}
+
+.wiz-hint {
+  font-size: .82rem;
+  color: var(--text-muted);
+  margin-bottom: 1.4rem;
+  font-weight: 300;
+}
+
+/* ── SEARCH INPUT ── */
+.wiz-search-wrap {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.wiz-search-icon {
+  position: absolute;
+  left: .9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.wiz-search-input {
+  width: 100%;
+  padding: .8rem 1rem .8rem 2.6rem;
+  background: var(--bg-2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: .93rem;
+  outline: none;
+  transition: all var(--transition);
+  min-height: 50px;
+}
+
+.wiz-search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.wiz-search-input:focus {
+  border-color: var(--lc);
+  box-shadow: 0 0 0 3px var(--lc-dim);
+}
+
+/* ── LOCATION BTN ── */
+.wiz-loc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .48rem .95rem;
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  border-radius: 99px;
+  color: var(--lc);
+  font-size: .78rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .2s ease;
+  margin-bottom: 1.4rem;
+}
+
+.wiz-loc-btn:hover {
+  background: var(--lc-dim);
+  border-color: var(--lc);
+}
+
+.wiz-loc-btn.loading {
+  opacity: .6;
+  pointer-events: none;
+}
+
+.wiz-loc-btn.success {
+  color: #4ade80;
+  border-color: #4ade80;
+  background: rgba(34, 197, 94, .08);
+}
+
+/* ── CHIPS ── */
+.wiz-chips-label {
+  font-size: .68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: .65rem;
+  font-weight: 500;
+}
+
+.wiz-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: 1.5rem;
+}
+
+.wiz-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .45rem .9rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  color: var(--text-muted);
+  font-size: .8rem;
+  cursor: pointer;
+  transition: all .2s ease;
+  user-select: none;
+}
+
+.wiz-chip:hover {
+  border-color: var(--lc-border);
+  color: var(--text);
+  background: var(--lc-dim);
+}
+
+.wiz-chip.selected {
+  background: var(--lc-dim);
+  border-color: var(--lc);
+  color: var(--lc);
+  font-weight: 500;
+}
+
+/* ── DATE GRID ── */
+.wiz-date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.wiz-date-field label {
+  display: block;
+  font-size: .72rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: .4rem;
+  font-weight: 500;
+}
+
+.wiz-date-field input[type="date"] {
+  width: 100%;
+  padding: .75rem 1rem;
+  background: var(--bg-2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: .9rem;
+  outline: none;
+  transition: border-color .25s;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.wiz-date-field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(.5) sepia(.5);
+  cursor: pointer;
+}
+
+.wiz-date-field input[type="date"]:focus {
+  border-color: var(--lc);
+}
+
+.wiz-duration-badge {
+  text-align: center;
+  padding: .55rem;
+  background: var(--lc-dim);
+  border: 1px solid var(--lc-border);
+  border-radius: 10px;
+  font-size: .8rem;
+  color: var(--lc);
+  margin-bottom: 1.25rem;
+}
+
+/* ── TRAVELER ROWS ── */
+.wiz-traveler-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .85rem 1.1rem;
+  margin-bottom: .65rem;
+}
+
+.wiz-traveler-info h4 {
+  font-size: .88rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: .1rem;
+}
+
+.wiz-traveler-info p {
+  font-size: .72rem;
+  color: var(--text-dim);
+}
+
+.wiz-trav-counter {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+
+.wiz-count-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+
+.wiz-count-btn:hover:not(:disabled) {
+  border-color: var(--lc);
+  color: var(--lc);
+  background: var(--lc-dim);
+}
+
+.wiz-count-btn:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+.wiz-count-val {
+  font-size: .95rem;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ── BUDGET CARDS ── */
+.wiz-budget-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .7rem;
+  margin-bottom: 1.25rem;
+}
+
+.wiz-budget-card {
+  padding: 1.1rem .8rem;
+  background: var(--bg-2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.wiz-budget-card:hover {
+  border-color: var(--lc-border);
+  transform: translateY(-2px);
+}
+
+.wiz-budget-card.selected {
+  border-color: var(--lc);
+  background: var(--lc-dim);
+}
+
+.wiz-b-icon {
+  font-size: 1.5rem;
+  margin-bottom: .4rem;
+}
+
+.wiz-b-title {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: .2rem;
+}
+
+.wiz-budget-card.selected .wiz-b-title {
+  color: var(--lc);
+}
+
+.wiz-b-range {
+  font-size: .68rem;
+  color: var(--text-dim);
+}
+
+/* ── FOOD PREFERENCE ── */
+.wiz-food-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .7rem;
+  margin-bottom: 1.25rem;
+}
+
+.wiz-food-card {
+  padding: 1.2rem .8rem;
+  background: var(--bg-2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.wiz-food-card:hover {
+  border-color: var(--lc-border);
+  transform: translateY(-2px);
+}
+
+.wiz-food-card.selected {
+  border-color: var(--lc);
+  background: var(--lc-dim);
+}
+
+.wiz-food-icon {
+  font-size: 2rem;
+  margin-bottom: .5rem;
+}
+
+.wiz-food-title {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: .3rem;
+}
+
+.wiz-food-card.selected .wiz-food-title {
+  color: var(--lc);
+}
+
+.wiz-food-desc {
+  font-size: .65rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* ── SUMMARY ── */
+.wiz-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .7rem;
+  margin-bottom: 1.25rem;
+}
+
+.wiz-summary-item {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .85rem 1rem;
+}
+
+.wiz-s-icon {
+  font-size: .95rem;
+  margin-bottom: .3rem;
+}
+
+.wiz-s-label {
+  font-size: .65rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  margin-bottom: .25rem;
+  font-weight: 500;
+}
+
+.wiz-s-value {
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── RESULT PANEL ── */
+.wiz-result-panel {
+  display: none;
+  padding: 0 .5rem 1.5rem;
+  animation: wizSlideIn .4s ease both;
+}
+
+.wiz-result-panel.active {
+  display: block;
+}
+
+.wiz-result-header {
+  text-align: center;
+  padding: 1.25rem 0 1rem;
+}
+
+.wiz-r-icon {
+  font-size: 2rem;
+  margin-bottom: .4rem;
+}
+
+.wiz-result-header h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: .2rem;
+}
+
+.wiz-result-header p {
+  font-size: .82rem;
+  color: var(--text-muted);
+}
+
+.wiz-result-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── PLAN STATS STRIP ── */
+.plan-stats-strip {
+  display: flex;
+  align-items: center;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: .75rem 1rem;
+  gap: .5rem;
+}
+
+.plan-stat {
+  flex: 1;
+  text-align: center;
+}
+
+.plan-stat-val {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--lc);
+  line-height: 1.2;
+}
+
+.plan-stat-lbl {
+  font-size: .62rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-top: 2px;
+}
+
+.plan-stat-div {
+  width: 1px;
+  height: 36px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* ── PLAN 2-COL GRID ── */
+.plan-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .85rem;
+}
+
+/* ── PLAN CARDS ── */
+.plan-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: box-shadow .2s;
+}
+
+.plan-card:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+}
+
+.plan-card-full {
+  grid-column: 1 / -1;
+}
+
+.plan-card-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .85rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.plan-card-header h4 {
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.plan-card-icon {
+  font-size: 1.1rem;
+}
+
+.plan-card-header--teal {
+  background: rgba(58, 140, 126, .12);
+}
+
+.plan-card-header--teal h4 {
+  color: #3a8c7e;
+}
+
+.plan-card-header--gold {
+  background: rgba(201, 168, 76, .12);
+}
+
+.plan-card-header--gold h4 {
+  color: #c9a84c;
+}
+
+.plan-card-header--orange {
+  background: rgba(245, 158, 11, .12);
+}
+
+.plan-card-header--orange h4 {
+  color: #f59e0b;
+}
+
+.plan-card-header--purple {
+  background: rgba(139, 92, 246, .12);
+}
+
+.plan-card-header--purple h4 {
+  color: #8b5cf6;
+}
+
+.plan-card-header--blue {
+  background: rgba(59, 130, 246, .12);
+}
+
+.plan-card-header--blue h4 {
+  color: #3b82f6;
+}
+
+/* ── PLAN LISTS ── */
+.plan-list {
+  list-style: none;
+  padding: .85rem 1.1rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.plan-list-item {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .84rem;
+  color: var(--text);
+}
+
+.plan-list-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--lc);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.plan-list-gem {
+  color: #c9a84c;
+  font-size: .75rem;
+  flex-shrink: 0;
+}
+
+/* ── FOOD LIST ── */
+.plan-food-list {
+  padding: .85rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.plan-food-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem .7rem;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.plan-food-name {
+  font-size: .84rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.plan-food-price {
+  font-size: .84rem;
+  color: var(--lc);
+  font-weight: 700;
+}
+
+/* ── BUDGET ── */
+.plan-budget-list {
+  padding: .85rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.plan-budget-row {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+.plan-budget-icon {
+  font-size: .95rem;
+  flex-shrink: 0;
+}
+
+.plan-budget-bar-wrap {
+  flex: 1;
+}
+
+.plan-budget-label-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: .3rem;
+}
+
+.plan-budget-label-row span:first-child {
+  font-size: .78rem;
+  color: var(--text-muted);
+}
+
+.plan-budget-amt {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.plan-budget-bar {
+  height: 6px;
+  background: var(--bg);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.plan-budget-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .6s ease;
+}
+
+.plan-budget-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: .65rem;
+  margin-top: .25rem;
+  border-top: 1px solid var(--border);
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--lc);
+}
+
+/* ── DAY CARDS GRID ── */
+.plan-days-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: .85rem;
+  padding: 1rem 1.1rem;
+}
+
+.plan-day-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: border-color .2s, transform .2s;
+}
+
+.plan-day-card:hover {
+  border-color: var(--lc-border);
+  transform: translateY(-2px);
+}
+
+.plan-day-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lc);
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: .5rem;
+}
+
+.plan-day-title {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: .75rem;
+  line-height: 1.3;
+}
+
+.plan-day-activities {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+
+.plan-day-act {
+  display: flex;
+  gap: .6rem;
+  align-items: flex-start;
+}
+
+.plan-day-act-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.plan-day-act-dot--morning {
+  background: #f59e0b;
+}
+
+.plan-day-act-dot--afternoon {
+  background: var(--lc);
+}
+
+.plan-day-act-dot--evening {
+  background: #8b5cf6;
+}
+
+.plan-day-act-dot--food {
+  background: #ec4899;
+}
+
+.plan-act-label {
+  display: block;
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-dim);
+  margin-bottom: 1px;
+}
+
+.plan-day-act p {
+  font-size: .82rem;
+  color: var(--text);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ── TIPS CARD ── */
+.plan-tips-card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem 1.2rem;
+  border-left: 3px solid #c9a84c;
+}
+
+.plan-tips-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.plan-tips-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #c9a84c;
+  margin-bottom: .3rem;
+}
+
+.plan-tips-text {
+  font-size: .84rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── PLAN TIME BADGE ── */
+.plan-act-time {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--uv);
+  background: var(--uv-mist);
+  border: 1px solid var(--lc-border);
+  border-radius: 20px;
+  padding: 0.1rem 0.55rem;
+  margin: 0.2rem 0 0.3rem;
+}
+
+.plan-act-tip {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-style: normal;
+  display: block;
+  margin-top: 0.2rem;
+}
+
+/* ── HOTEL SUGGESTIONS ── */
+.plan-hotels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 1.2rem;
+}
+
+.plan-hotel-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.plan-hotel-card:hover {
+  border-color: var(--uv);
+  transform: translateY(-2px);
+}
+
+.plan-hotel-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.plan-hotel-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.plan-hotel-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--uv-mist);
+  color: var(--uv);
+  border: 1px solid var(--lc-border);
+  border-radius: 20px;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.plan-hotel-area {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.plan-hotel-price {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--uv);
+  margin-top: 0.2rem;
+}
+
+.plan-hotel-price span {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.plan-hotel-why {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+  font-style: italic;
+}
+
+/* ── TRANSPORT CARD ── */
+.plan-transport-card {
+  padding: 0 0 0.5rem !important;
+}
+
+.plan-transport-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 1.2rem 0.8rem;
+}
+
+.plan-transport-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.plan-transport-item:last-child {
+  border-bottom: none;
+}
+
+.plan-transport-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.plan-transport-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin-bottom: 0.2rem;
+}
+
+.plan-transport-val {
+  font-size: 0.84rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+/* ── PER-PERSON BUDGET ── */
+.plan-budget-all {
+  font-weight: 700 !important;
+}
+
+/* ── LIGHT THEME OVERRIDES ── */
+[data-theme="light"] .plan-card {
+  background: #fff;
+  border-color: rgba(171, 209, 198, .5);
+}
+
+[data-theme="light"] .plan-card:hover {
+  box-shadow: 0 4px 24px rgba(58, 140, 126, .12);
+}
+
+[data-theme="light"] .plan-stats-strip {
+  background: #f0fbf8;
+  border-color: rgba(171, 209, 198, .4);
+}
+
+[data-theme="light"] .plan-food-item {
+  background: #f8fffe;
+}
+
+[data-theme="light"] .plan-day-card {
+  background: #f8fffe;
+  border-color: rgba(171, 209, 198, .4);
+}
+
+[data-theme="light"] .plan-day-card:hover {
+  border-color: #3a8c7e;
+}
+
+[data-theme="light"] .plan-budget-bar {
+  background: #e8f5f2;
+  border-color: rgba(171, 209, 198, .4);
+}
+
+[data-theme="light"] .plan-budget-total {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .plan-stat-val {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .plan-food-price {
+  color: #2d6e63;
+}
+
+[data-theme="light"] .plan-list-item {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .plan-day-title {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .plan-day-act p {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .plan-tips-card {
+  background: #fffbf0;
+  border-color: rgba(201, 168, 76, .4);
+  border-left-color: #c9a84c;
+}
+
+/* ── PDF BUTTON ── */
+.wiz-btn-pdf {
+  background: linear-gradient(135deg, #3a8c7e, #2d6e63) !important;
+}
+
+/* ── FOOTER NAV ── */
+.wiz-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: rgba(10, 20, 18, .5);
+}
+
+.wiz-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .6rem 1.1rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text-muted);
+  font-size: .82rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.wiz-btn-back:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.wiz-btn-back:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+.wiz-btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .65rem 1.6rem;
+  background: var(--lc);
+  border: none;
+  border-radius: 9px;
+  color: var(--bg);
+  font-size: .85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.wiz-btn-next:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-uv);
+}
+
+.wiz-btn-next:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wiz-step-count {
+  font-size: .7rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.wiz-dot-loader {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.wiz-dot-loader span {
+  width: 5px;
+  height: 5px;
+  background: var(--bg);
+  border-radius: 50%;
+  animation: aiDot .8s ease infinite;
+}
+
+.wiz-dot-loader span:nth-child(2) {
+  animation-delay: .15s;
+}
+
+.wiz-dot-loader span:nth-child(3) {
+  animation-delay: .3s;
 }
 
 
-const CITY_DATA = {
-    jaipur: {
-        name: 'Jaipur', badge: 'Rajasthan', tagline: 'The Pink City – Palaces, Forts & Royal Heritage',
-        img: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1200&q=80',
-        famous: ['Amber Fort', 'City Palace', 'Hawa Mahal', 'Jantar Mantar', 'Nahargarh Fort'],
-        food: [{ name: 'Pyaaz Kachori', price: '₹20' }, { name: 'Dal Baati Churma', price: '₹80' }, { name: 'Laal Maas', price: '₹200' }, { name: 'Ghewar', price: '₹60' }, { name: 'Mawa Kachori', price: '₹30' }],
-        hidden: ['Panna Meena ka Kund', 'Sisodia Rani Garden', 'Khole ke Hanuman Ji', 'Sanganer Village', 'Galtaji Temple'],
-        hotels: ['Rambagh Palace (Luxury)', 'Hotel Pearl Palace (Budget)', 'Jai Mahal Palace (Heritage)', 'Zostel Jaipur (Backpacker)'],
-        tips: 'Visit forts early morning to avoid crowds. Hire a local guide for ₹500.',
-        per_day: { budget: 1100, normal: 2900, luxury: 8700 }
-    },
-    goa: {
-        name: 'Goa', badge: 'Beach', tagline: 'Sun, Sand & Portuguese Charm on India\'s Coast',
-        img: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1200&q=80',
-        famous: ['Baga Beach', 'Basilica of Bom Jesus', 'Fort Aguada', 'Anjuna Beach', 'Calangute Beach'],
-        food: [{ name: 'Prawn Balchão', price: '₹150' }, { name: 'Bebinca Dessert', price: '₹60' }, { name: 'Goan Fish Curry', price: '₹200' }, { name: 'Cafreal Chicken', price: '₹180' }],
-        hidden: ['Butterfly Beach', 'Arambol Sweet Lake', 'Divar Island', 'Cabo de Rama Fort', 'Chorla Ghats'],
-        hotels: ['Taj Exotica (Luxury)', 'Zostel Goa (Budget)', 'La Maison Fontaine (Boutique)', 'Backpacker Panda Calangute'],
-        tips: 'North Goa for parties, South Goa for peace. Rent a scooter for ₹300/day.',
-        per_day: { budget: 1550, normal: 4200, luxury: 10500 }
-    },
-    manali: {
-        name: 'Manali', badge: 'Mountains', tagline: 'Snow-Capped Peaks, Rivers & Adventure Awaits',
-        img: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1200&q=80',
-        famous: ['Rohtang Pass', 'Solang Valley', 'Hadimba Temple', 'Beas River', 'Mall Road'],
-        food: [{ name: 'Siddu (Local Bread)', price: '₹50' }, { name: 'Trout Fish Fry', price: '₹250' }, { name: 'Aktori Pancake', price: '₹40' }, { name: 'Dham Feast', price: '₹120' }],
-        hidden: ['Naggar Castle', 'Great Himalayan National Park', 'Chandrakhani Pass', 'Bijli Mahadev', 'Malana Village'],
-        hotels: ['Span Resort (Luxury)', 'Zostel Manali (Budget)', 'Johnson Lodge (Mid-range)', 'Snow Valley Resorts'],
-        tips: 'Carry warm clothes even in summer. Book Rohtang Pass permits online 24hrs in advance.',
-        per_day: { budget: 1400, normal: 3500, luxury: 8800 }
-    },
-    varanasi: {
-        name: 'Varanasi', badge: 'Spiritual', tagline: 'The Oldest Living City – Ghats, Temples & Ganga',
-        img: 'https://images.unsplash.com/photo-1561361058-c24e01238a46?w=1200&q=80',
-        famous: ['Dashashwamedh Ghat', 'Kashi Vishwanath Temple', 'Sarnath', 'Manikarnika Ghat', 'Assi Ghat'],
-        food: [{ name: 'Kachori Sabzi', price: '₹30' }, { name: 'Banarasi Paan', price: '₹20' }, { name: 'Thandai', price: '₹50' }, { name: 'Tamatar Chaat', price: '₹40' }, { name: 'Malaiyo', price: '₹30' }],
-        hidden: ['Lalita Ghat', 'Scindia Ghat', 'Tulsi Manas Temple', 'Ramnagar Fort', 'Banaras Ghats at Dawn'],
-        hotels: ['BrijRama Palace (Heritage)', 'Stops Hostel (Budget)', 'Hotel Surya (Mid-range)', 'Ganges View Hotel'],
-        tips: 'Wake up for sunrise boat ride on Ganga (₹200). Ganga Aarti at 7pm is unmissable.',
-        per_day: { budget: 950, normal: 2550, luxury: 6500 }
-    },
-    kerala: {
-        name: 'Kerala', badge: 'Nature', tagline: 'God\'s Own Country – Backwaters, Spice & Serenity',
-        img: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1200&q=80',
-        famous: ['Alleppey Backwaters', 'Munnar Tea Gardens', 'Kovalam Beach', 'Periyar Wildlife Sanctuary', 'Varkala Cliff'],
-        food: [{ name: 'Appam & Stew', price: '₹80' }, { name: 'Kerala Sadya', price: '₹150' }, { name: 'Karimeen Pollichathu', price: '₹300' }, { name: 'Puttu & Kadala', price: '₹60' }, { name: 'Pazham Pori', price: '₹20' }],
-        hidden: ['Gavi Eco Forest', 'Bekal Fort', 'Thenmala Eco Tourism', 'Athirapally Waterfalls', 'Wayanad Hills'],
-        hotels: ['Kumarakom Lake Resort (Luxury)', 'Zostel Varkala (Budget)', 'Philipkutty Farm (Boutique)', 'EarthHome Stays'],
-        tips: 'Houseboat stay in Alleppey is a must-do (from ₹6000/night). Oct–Feb is peak season.',
-        per_day: { budget: 1400, normal: 3850, luxury: 10000 }
-    },
-    ladakh: {
-        name: 'Ladakh', badge: 'High Altitude', tagline: 'Moonscapes, Monasteries & Cosmic Landscapes',
-        img: 'https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?w=1200&q=80',
-        famous: ['Pangong Lake', 'Nubra Valley', 'Leh Palace', 'Magnetic Hill', 'Hemis Monastery'],
-        food: [{ name: 'Thukpa Noodle Soup', price: '₹80' }, { name: 'Skyu Pasta', price: '₹70' }, { name: 'Butter Tea', price: '₹30' }, { name: 'Tsampa Porridge', price: '₹50' }, { name: 'Steamed Momos', price: '₹60' }],
-        hidden: ['Tso Moriri Lake', 'Zanskar Valley', 'Dah Hanu Village', 'Phugtal Monastery', 'Hanle Dark Sky Reserve'],
-        hotels: ['Grand Dragon Ladakh (Luxury)', 'Zostel Leh (Budget)', 'Stok Palace Heritage (Heritage)', 'The Indus Valley'],
-        tips: 'Acclimatize 2 days in Leh before excursions. Carry cash — ATMs are unreliable above 3500m.',
-        per_day: { budget: 1900, normal: 4700, luxury: 12000 }
-    }
-};
-
-// ─── STATE FLAGS / EMOJIS ───────────────────────────────────────
-const STATE_FLAGS = {
-    'Rajasthan': '🏜️', 'Maharashtra': '🌆', 'Tamil Nadu': '🏛️',
-    'Kerala': '🌴', 'Goa': '🏖️', 'Himachal Pradesh': '🏔️',
-    'Uttarakhand': '⛰️', 'Jammu & Kashmir': '❄️', 'Ladakh': '🌌',
-    'Punjab': '🌾', 'Haryana': '🌾', 'Delhi': '🕌',
-    'Uttar Pradesh': '🛕', 'Bihar': '🪷', 'West Bengal': '🐯',
-    'Odisha': '🌊', 'Andhra Pradesh': '🌶️', 'Telangana': '💎',
-    'Karnataka': '🌳', 'Gujarat': '🦁', 'Madhya Pradesh': '🐆',
-    'Chhattisgarh': '🌿', 'Jharkhand': '⛏️', 'Assam': '🍵',
-    'Meghalaya': '🌧️', 'Sikkim': '🏔️', 'Arunachal Pradesh': '🦅',
-    'Manipur': '💃', 'Mizoram': '🌸', 'Nagaland': '🎭',
-    'Tripura': '🏯', 'Andaman and Nicobar': '🐢', 'Lakshadweep': '🪸',
-    'Chandigarh': '🏙️', 'Puducherry': '⛵'
-};
-
-// ─── WELCOME OVERLAY ────────────────────────────────────────────
-const WELCOME_GREETINGS = [
-    { word: 'Namaste', lang: 'Hindi · नमस्ते' },
-    { word: 'Kem Cho', lang: 'Gujarati · કેમ છો' },
-    { word: 'Vanakkam', lang: 'Tamil · வணக்கம்' },
-    { word: 'Namaskar', lang: 'Marathi · नमस्कार' },
-    { word: 'Sat Sri Akal', lang: 'Punjabi · ਸਤ ਸ੍ਰੀ ਅਕਾਲ' },
-    { word: 'Nomoshkar', lang: 'Bengali · নমস্কার' },
-    { word: 'Marhaba', lang: 'Urdu · مرحبا' },
-];
-
-function initWelcomeOverlay() {
-    const overlay = document.getElementById('welcomeOverlay');
-    const wordEl = document.getElementById('welcomeWord');
-    const langEl = document.getElementById('welcomeLang');
-    const dotsEl = document.getElementById('welcomeDots');
-    if (!overlay) return;
-
-    WELCOME_GREETINGS.forEach((_, i) => {
-        const dot = document.createElement('div');
-        dot.className = 'welcome-dot' + (i === 0 ? ' active' : '');
-        dotsEl.appendChild(dot);
-    });
-
-    let idx = 0;
-    const dots = dotsEl.querySelectorAll('.welcome-dot');
-
-    function showGreeting(i) {
-        const g = WELCOME_GREETINGS[i];
-        wordEl.textContent = g.word;
-        langEl.textContent = g.lang;
-        wordEl.style.animation = 'none';
-        langEl.style.animation = 'none';
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                wordEl.style.animation = 'welcomeFadeSlide 1.3s ease forwards';
-                langEl.style.animation = 'welcomeFadeSlide 1.3s ease forwards';
-            });
-        });
-        dots.forEach((d, di) => d.classList.toggle('active', di === i));
-    }
-
-    showGreeting(0);
-
-    const interval = setInterval(() => {
-        idx++;
-        if (idx >= WELCOME_GREETINGS.length) {
-            clearInterval(interval);
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                overlay.style.pointerEvents = 'none';
-                const loader = document.getElementById('loader');
-                if (loader) {
-                    loader.classList.add('active');
-                    setTimeout(() => {
-                        loader.classList.remove('active');
-                        loader.classList.add('hidden');
-                        loader.style.pointerEvents = 'none';
-                        loader.style.display = 'none';
-                        initScrollReveal();
-                        initGreeting();
-                        initIndiaMap();
-                    }, 1800);
-                }
-            }, 400);
-            return;
-        }
-        showGreeting(idx);
-    }, 1400);
+.surplus-positive {
+  color: #4ade80 !important;
 }
 
-// ─── LOADER ─────────────────────────────────────────────────────
-window.addEventListener('load', () => {
-    initWelcomeOverlay();
-});
-
-function initGreeting() {
-    const hour = new Date().getHours();
-    let g = 'Namaste 🙏';
-    if (hour < 12) g = 'Good Morning 🌅';
-    else if (hour < 17) g = 'Good Afternoon ☀️';
-    else if (hour < 20) g = 'Good Evening 🌇';
-    const el = document.getElementById('greetingText');
-    if (el) el.textContent = g;
+.surplus-negative {
+  color: #f87171 !important;
 }
 
-// ─── THEME TOGGLE ─────────────────────────────────────────────
-function getThemeIcon(theme) {
-    return theme === 'dark' ? '🌙' : '🌊';
+/* ── PLACES ── */
+.places-section {
+  background: var(--bg-2);
 }
 
-function toggleTheme() {
-    const html = document.documentElement;
-    const current = html.getAttribute('data-theme') || 'dark';
-    const next = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('pyti_theme', next);
+.places-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .85rem;
 }
 
-(function initTheme() {
-    const saved = localStorage.getItem('pyti_theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', saved);
-})();
-
-// ─── NAVBAR ─────────────────────────────────────────────────────
-window.addEventListener('scroll', () => {
-    const navbar = document.getElementById('navbar');
-    navbar.classList.toggle('scrolled', window.scrollY > 50);
-    updateActiveNav();
-});
-
-function updateActiveNav() {
-    const sections = document.querySelectorAll('section[id]');
-    const links = document.querySelectorAll('.nav-link');
-    let current = '';
-    sections.forEach(sec => {
-        if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
-    });
-    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+.place-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
 }
 
-// ─── MOBILE NAV OVERLAY ─────────────────────────────────────────
-(function setupMobileNav() {
-    const hamburger = document.getElementById('hamburger');
-    if (!hamburger) return;
-
-    const overlay = document.createElement('div');
-    overlay.className = 'nav-mobile-overlay';
-    overlay.id = 'navMobileOverlay';
-    overlay.innerHTML = `
-    <a href="#home"      class="nav-link" data-close>Home</a>
-    <a href="#india-map" class="nav-link" data-close>India Map</a>
-    <a href="#places"    class="nav-link" data-close>Places</a>
-    <a href="#all-cities" class="nav-link" data-close>All Cities</a>
-    <a href="#planner"   class="nav-link" data-close>AI Planner</a>
-    <a href="#about"     class="nav-link" data-close>About</a>
-    <a href="#contact"   class="nav-link" data-close>Contact</a>
-    <div class="nav-mobile-divider"></div>
-    <div class="nav-mobile-auth" id="mobileAuthBtns">
-      <button class="btn-nav-login" id="mobLoginBtn">Login</button>
-      <button class="btn-nav-signup" id="mobSignupBtn">Sign Up ✦</button>
-    </div>
-  `;
-    document.body.appendChild(overlay);
-
-    function openNav() {
-        hamburger.classList.add('open');
-        overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
-        if (window.updateMobileAuthUI) window.updateMobileAuthUI();
-    }
-    function closeNav() {
-        hamburger.classList.remove('open');
-        overlay.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
-    hamburger.addEventListener('click', () => {
-        overlay.classList.contains('open') ? closeNav() : openNav();
-    });
-
-    overlay.querySelectorAll('[data-close]').forEach(el => {
-        el.addEventListener('click', closeNav);
-    });
-
-    overlay.addEventListener('click', e => {
-        const t = e.target;
-        if (t.id === 'mobLoginBtn') { closeNav(); openModal('loginModal'); }
-        if (t.id === 'mobSignupBtn') { closeNav(); openModal('signupModal'); }
-        if (t.dataset.logout !== undefined) { closeNav(); logoutUser(); }
-    });
-
-    window.updateMobileAuthUI = function () {
-        const area = document.getElementById('mobileAuthBtns');
-        if (!area) return;
-        if (currentUser) {
-            const initials = ((currentUser.first || '?')[0] + (currentUser.last || '?')[0]).toUpperCase();
-            area.innerHTML = `
-        <div class="nav-user-badge" style="justify-content:center;gap:.6rem">
-          <div class="nav-user-avatar">${initials}</div>
-          <span>${currentUser.first}</span>
-          <button data-logout style="background:none;border:none;color:var(--text-dim);font-size:.82rem;cursor:pointer;margin-left:.3rem">↩ Out</button>
-        </div>`;
-        } else {
-            area.innerHTML = `
-        <button class="btn-nav-login" id="mobLoginBtn">Login</button>
-        <button class="btn-nav-signup" id="mobSignupBtn">Sign Up ✦</button>`;
-        }
-    };
-
-    document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', closeNav));
-
-    window.closeMobileNav = closeNav;
-    window.openMobileNav = openNav;
-})();
-
-// ─── SCROLL REVEAL ──────────────────────────────────────────────
-function initScrollReveal() {
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach((entry, i) => {
-            if (entry.isIntersecting) {
-                setTimeout(() => entry.target.classList.add('visible'), i * 80);
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+.place-card:active {
+  transform: scale(.98);
 }
 
-// ─── INDIA MAP ─────────────────────────────────────────────────
-function initIndiaMap() {
-    // SVG map is initialized inline in index.html
+.place-img-wrap {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
 }
 
-async function onStateClick(stateName) {
-    if (!stateName) return;
-    currentStateClicked = stateName;
-
-    document.getElementById('mapPanelDefault').style.display = 'none';
-    document.getElementById('mapPanelResult').style.display = 'flex';
-    document.getElementById('mapStateFlag').textContent = STATE_FLAGS[stateName] || '🗺️';
-    document.getElementById('mapStateName').textContent = stateName;
-    document.getElementById('mapStateTagline').textContent = 'Getting AI recommendations...';
-    document.getElementById('mapResultLoading').style.display = 'block';
-    document.getElementById('mapResultContent').style.display = 'none';
-    document.getElementById('mapResultActions').style.display = 'none';
-
-    const prompt = `Give me a concise travel overview of ${stateName}, India. Format exactly like this:
-
-📍 QUICK FACTS
-• Capital: [city]
-• Best season: [months]
-• Known for: [2-3 things]
-
-🌟 TOP 3 MUST-VISIT PLACES
-• [Place 1] — [one line why]
-• [Place 2] — [one line why]
-• [Place 3] — [one line why]
-
-🍽️ LOCAL FOOD TO TRY
-• [Food 1], [Food 2], [Food 3]
-
-💡 TRAVELLER TIP
-[One practical tip for visiting ${stateName}]
-
-Keep it under 180 words total.`;
-
-    try {
-        const response = await callGroqAI([{ role: 'user', content: prompt }]);
-        document.getElementById('mapResultLoading').style.display = 'none';
-        document.getElementById('mapResultContent').style.display = 'block';
-        document.getElementById('mapResultContent').textContent = response;
-        document.getElementById('mapResultActions').style.display = 'flex';
-        document.getElementById('mapStateTagline').textContent = `Explore ${stateName}`;
-    } catch (err) {
-        document.getElementById('mapResultLoading').style.display = 'none';
-        document.getElementById('mapResultContent').style.display = 'block';
-        document.getElementById('mapResultContent').textContent = `Could not load AI info for ${stateName}. Please check your connection and try again.`;
-    }
+.place-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .5s ease;
 }
 
-function triggerStateAI(stateName) {
-    onStateClick(stateName);
+.place-card:hover .place-img-wrap img {
+  transform: scale(1.05);
 }
 
-function chatAboutState() {
-    openChat();
-    setTimeout(() => {
-        const msg = `Tell me more about travelling in ${currentStateClicked}, India — best hidden gems, visa-free zones, must-try local experiences and a suggested 5-day itinerary.`;
-        document.getElementById('chatInput').value = msg;
-        sendMessage();
-    }, 300);
+.place-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, .5) 0%, transparent 60%);
+  pointer-events: none;
 }
 
-function planThisState() {
-    wizSelectDest(currentStateClicked);
-    document.getElementById('planner').scrollIntoView({ behavior: 'smooth' });
+.place-badge {
+  position: absolute;
+  top: .75rem;
+  left: .75rem;
+  padding: .22rem .65rem;
+  border-radius: 99px;
+  background: var(--lc);
+  color: #0f2e28;
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
 }
 
-// ─── WIZARD STATE ────────────────────────────────────────────────
-let wizCurrentStep = 1;
-const WIZ_TOTAL = 6;
-const wizState = {
-    from: '',
-    destination: '',
-    dateFrom: '',
-    dateTo: '',
-    duration: 0,
-    styles: [],
-    adults: 2,
-    children: 0,
-    budget: 'normal',
-    customBudget: 0,
-    accom: ['Resort'],
-    food: '',
-    diet: []
-};
-
-function wizNextStep() {
-    if (!wizValidate(wizCurrentStep)) return;
-    if (wizCurrentStep === WIZ_TOTAL) { wizGeneratePlan(); return; }
-
-    const curItem = document.getElementById('wizStep' + wizCurrentStep);
-    curItem.classList.remove('active');
-    curItem.classList.add('completed');
-    curItem.querySelector('.wiz-step-circle').innerHTML = '✓';
-    document.getElementById('wizPanel' + wizCurrentStep).classList.remove('active');
-
-    wizCurrentStep++;
-    document.getElementById('wizStep' + wizCurrentStep).classList.add('active');
-    document.getElementById('wizPanel' + wizCurrentStep).classList.add('active');
-
-    document.getElementById('wizBackBtn').disabled = false;
-    document.getElementById('wizStepCount').textContent = `Step ${wizCurrentStep} of ${WIZ_TOTAL}`;
-    document.getElementById('wizNextBtnText').textContent = wizCurrentStep === WIZ_TOTAL ? 'Generate Plan ✦' : 'Continue';
-
-    if (wizCurrentStep === WIZ_TOTAL) wizPopulateSummary();
-    document.getElementById('wizardCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+.place-hover-cta {
+  position: absolute;
+  bottom: .75rem;
+  right: .75rem;
+  padding: .35rem .8rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .15);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 500;
 }
 
-function wizPrevStep() {
-    if (wizCurrentStep === 1) return;
-    document.getElementById('wizPanel' + wizCurrentStep).classList.remove('active');
-    document.getElementById('wizStep' + wizCurrentStep).classList.remove('active');
-
-    wizCurrentStep--;
-    document.getElementById('wizPanel' + wizCurrentStep).classList.add('active');
-    const item = document.getElementById('wizStep' + wizCurrentStep);
-    item.classList.remove('completed');
-    item.classList.add('active');
-    item.querySelector('.wiz-step-circle').innerHTML = wizCurrentStep;
-
-    document.getElementById('wizBackBtn').disabled = (wizCurrentStep === 1);
-    document.getElementById('wizStepCount').textContent = `Step ${wizCurrentStep} of ${WIZ_TOTAL}`;
-    document.getElementById('wizNextBtnText').textContent = 'Continue';
+.place-info {
+  padding: .9rem 1rem;
 }
 
-function wizValidate(step) {
-    if (step === 1) {
-        const dest = document.getElementById('wizDestInput')?.value?.trim() || '';
-        wizState.destination = dest;
-        wizState.from = document.getElementById('wizFromInput')?.value?.trim() || '';
-        if (!dest) {
-            showToast('📍 Please enter where you want to go!');
-            document.getElementById('wizDestInput').focus();
-            return false;
-        }
-    }
-    if (step === 2) {
-        if (!wizState.dateFrom || !wizState.dateTo) {
-            showToast('📅 Please select both departure and return dates');
-            return false;
-        }
-        if (new Date(wizState.dateFrom) >= new Date(wizState.dateTo)) {
-            showToast('📅 Return date must be after departure date');
-            return false;
-        }
-    }
-    return true;
+.place-info h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: .3rem;
 }
 
-function wizSwapRoutes() {
-    const fromEl = document.getElementById('wizFromInput');
-    const toEl = document.getElementById('wizDestInput');
-    if (!fromEl || !toEl) return;
-    const tmp = fromEl.value;
-    fromEl.value = toEl.value;
-    toEl.value = tmp;
-    wizState.from = fromEl.value;
-    wizState.destination = toEl.value;
+.place-info p {
+  color: var(--text-muted);
+  font-size: .8rem;
+  line-height: 1.55;
 }
 
-function wizSelectDest(name) {
-    wizState.destination = name;
-    const inp = document.getElementById('wizDestInput');
-    if (inp) inp.value = name;
-    document.querySelectorAll('#wizDestChips .wiz-chip').forEach(c => {
-        c.classList.toggle('selected', c.textContent.trim().includes(name));
-    });
+/* ── FEATURES ── */
+.features-section {
+  background: var(--bg);
 }
 
-function wizFilterChips(val) {
-    wizState.destination = val;
-    document.querySelectorAll('#wizDestChips .wiz-chip').forEach(c => {
-        const name = c.textContent.replace(/^[\u{1F000}-\u{1FFFF}]|\s*/gu, '').trim();
-        c.style.display = (!val || name.toLowerCase().includes(val.toLowerCase())) ? '' : 'none';
-    });
+.features-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
 }
 
-function wizCalcDuration() {
-    const f = document.getElementById('wizDateFrom').value;
-    const t = document.getElementById('wizDateTo').value;
-    wizState.dateFrom = f; wizState.dateTo = t;
-    if (f && t) {
-        const days = Math.round((new Date(t) - new Date(f)) / 86400000);
-        if (days > 0) {
-            wizState.duration = days;
-            document.getElementById('wizDurationBadge').textContent =
-                `🗺️ ${days} day${days > 1 ? 's' : ''} trip · ${wizFmtDate(f)} → ${wizFmtDate(t)}`;
-        } else {
-            document.getElementById('wizDurationBadge').textContent = '⚠️ Return date must be after departure';
-        }
-    }
+.feature-card {
+  padding: 1.75rem 1.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
-function wizFmtDate(str) {
-    return new Date(str).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--lc-dim) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .3s ease;
 }
 
-function wizSetDuration(days) {
-    const from = new Date(); from.setDate(from.getDate() + 7);
-    const to = new Date(from); to.setDate(from.getDate() + days);
-    const fStr = from.toISOString().split('T')[0];
-    const tStr = to.toISOString().split('T')[0];
-    document.getElementById('wizDateFrom').value = fStr;
-    document.getElementById('wizDateTo').value = tStr;
-    wizState.dateFrom = fStr; wizState.dateTo = tStr; wizState.duration = days;
-    document.getElementById('wizDurationBadge').textContent =
-        `🗺️ ${days} day${days > 1 ? 's' : ''} trip · ${wizFmtDate(fStr)} → ${wizFmtDate(tStr)}`;
+.feature-card:hover {
+  border-color: var(--lc-border);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .25);
 }
 
-function wizToggleChip(el, group) {
-    el.classList.toggle('selected');
-    const name = el.textContent.replace(/^\S+\s*/, '').trim();
-    if (group === 'style') {
-        wizState.styles = el.classList.contains('selected')
-            ? [...new Set([...wizState.styles, name])]
-            : wizState.styles.filter(s => s !== name);
-    } else if (group === 'diet') {
-        wizState.diet = el.classList.contains('selected')
-            ? [...new Set([...wizState.diet, name])]
-            : wizState.diet.filter(s => s !== name);
-    } else {
-        wizState.accom = el.classList.contains('selected')
-            ? [...new Set([...wizState.accom, name])]
-            : wizState.accom.filter(s => s !== name);
-    }
+.feature-card:hover::before {
+  opacity: 1;
 }
 
-function wizChangeTrav(type, delta) {
-    if (type === 'adults') {
-        wizState.adults = Math.max(1, wizState.adults + delta);
-        document.getElementById('wizAdultsCount').textContent = wizState.adults;
-        document.getElementById('wizAdultsDown').disabled = (wizState.adults <= 1);
-    } else {
-        wizState.children = Math.max(0, wizState.children + delta);
-        document.getElementById('wizChildCount').textContent = wizState.children;
-        document.getElementById('wizChildDown').disabled = (wizState.children <= 0);
-    }
+.feature-icon {
+  font-size: 1.5rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--lc-dim);
+  border: 1px solid var(--lc-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.1rem;
+  color: var(--lc);
+  position: relative;
+  z-index: 1;
 }
 
-function wizSelectBudget(el, val) {
-    document.querySelectorAll('.wiz-budget-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    wizState.budget = val;
-    wizState.customBudget = 0;
-    const inp = document.getElementById('wizCustomBudget');
-    if (inp) inp.value = '';
-    const note = document.getElementById('wizCustomBudgetNote');
-    if (note) note.textContent = '';
+.feature-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: .5rem;
+  position: relative;
+  z-index: 1;
 }
 
-function wizSetCustomBudget(val) {
-    const amount = parseInt(val, 10);
-    const note = document.getElementById('wizCustomBudgetNote');
-    if (!amount || amount < 500) {
-        wizState.customBudget = 0;
-        if (note) note.textContent = '';
-        return;
-    }
-    wizState.customBudget = amount;
-    document.querySelectorAll('.wiz-budget-card').forEach(c => c.classList.remove('selected'));
-    if (amount < 15000) wizState.budget = 'budget';
-    else if (amount < 40000) wizState.budget = 'normal';
-    else wizState.budget = 'luxury';
-    if (note) note.textContent = `✓ Custom budget set: ₹${amount.toLocaleString('en-IN')} per person`;
+.feature-card p {
+  color: var(--text-muted);
+  font-size: .84rem;
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
 }
 
-function wizSelectFood(el, val) {
-    document.querySelectorAll('.wiz-food-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    wizState.food = val;
+/* ── ABOUT ── */
+.about-section {
+  background: var(--bg-2);
 }
 
-function wizPopulateSummary() {
-    const fromCity = document.getElementById('wizFromInput')?.value?.trim() || wizState.from || '—';
-    wizState.from = fromCity;
-    const destVal = document.getElementById('wizDestInput')?.value?.trim() || wizState.destination || '—';
-    wizState.destination = destVal;
-
-    const routeText = fromCity && fromCity !== '—'
-        ? `${fromCity} → ${destVal}`
-        : destVal;
-    document.getElementById('wizSumDest').textContent = routeText;
-    document.getElementById('wizSumDuration').textContent = wizState.duration
-        ? `${wizState.duration} days · ${wizFmtDate(wizState.dateFrom)} to ${wizFmtDate(wizState.dateTo)}`
-        : '—';
-    document.getElementById('wizSumTravelers').textContent =
-        `${wizState.adults} adult${wizState.adults > 1 ? 's' : ''}${wizState.children ? ` + ${wizState.children} child${wizState.children > 1 ? 'ren' : ''}` : ''}`;
-    const bl = { budget: '🎒 Budget (₹5k–₹15k)', normal: '✈️ Mid-Range (₹15k–₹40k)', luxury: '👑 Luxury (₹40k+)' };
-    const budgetText = wizState.customBudget
-        ? `✏️ Custom — ₹${wizState.customBudget.toLocaleString('en-IN')} per person`
-        : (bl[wizState.budget] || '—');
-    document.getElementById('wizSumBudget').textContent = budgetText;
-    document.getElementById('wizSumStyle').textContent = wizState.styles.length ? wizState.styles.join(' · ') : 'Not specified';
-    const foodLabels = { veg: '🥗 Vegetarian', both: '🍱 Both / No Preference' };
-    let foodText = foodLabels[wizState.food] || '—';
-    if (wizState.diet && wizState.diet.length) foodText += ' · ' + wizState.diet.join(', ');
-    document.getElementById('wizSumFood').textContent = foodText;
+.about-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+  margin-top: 2.5rem;
 }
 
-async function wizGeneratePlan() {
-    const btn = document.getElementById('wizNextBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span>Crafting</span> <span class="wiz-dot-loader"><span></span><span></span><span></span></span>';
-    document.getElementById('wizBackBtn').disabled = true;
-
-    const dest = wizState.destination;
-    const from = wizState.from;
-    const dur = wizState.duration || 5;
-    const people = wizState.adults + wizState.children;
-    const style = wizState.styles.join(', ') || 'cultural';
-    const foodPref = wizState.food === 'veg' ? 'Vegetarian only' : 'Both veg and non-veg';
-    const dietExtra = wizState.diet && wizState.diet.length ? `, special needs: ${wizState.diet.join(', ')}` : '';
-    const fromLine = from ? `Traveling from: ${from}. ` : '';
-    const budgetPerPerson = wizState.customBudget || { budget: 10000, normal: 27000, luxury: 60000 }[wizState.budget] || 27000;
-    const budgetLabel = wizState.customBudget
-        ? `Custom ₹${wizState.customBudget.toLocaleString('en-IN')} per person`
-        : { budget: 'Budget (₹5k–₹15k)', normal: 'Mid-Range (₹15k–₹40k)', luxury: 'Luxury (₹40k+)' }[wizState.budget];
-
-    const cityKey = Object.keys(CITY_DATA).find(k => dest.toLowerCase().includes(k));
-    const cityData = cityKey ? CITY_DATA[cityKey] : null;
-
-    try {
-        const prompt = `Create a detailed ${dur}-day travel itinerary for ${dest}, India.
-${fromLine}Travelers: ${people} (${wizState.adults} adult${wizState.adults > 1 ? 's' : ''}, ${wizState.children} children).
-Budget: ${budgetLabel} — ₹${budgetPerPerson.toLocaleString('en-IN')} per person total.
-Style: ${style}. Food: ${foodPref}${dietExtra}. Accommodation preference: ${wizState.accom.join(', ') || 'Resort'}.
-
-Respond ONLY with valid JSON (no markdown, no explanation):
-{
-  "city": "${dest}",
-  "tagline": "evocative one-liner",
-  "transport": {
-    "how_to_reach": "best way to reach from ${from || 'major city'} — train/flight/bus with name, duration, approx cost",
-    "train": "specific train name and number if applicable, e.g. Rajdhani Express 12951",
-    "local_transport": "best local transport inside ${dest}"
-  },
-  "hotels": [
-    {"name": "Hotel Name", "type": "Budget/Mid-range/Luxury", "area": "area name", "price_per_night": "₹XXXX", "why": "one reason"},
-    {"name": "Hotel Name", "type": "Budget/Mid-range/Luxury", "area": "area name", "price_per_night": "₹XXXX", "why": "one reason"},
-    {"name": "Hotel Name", "type": "Budget/Mid-range/Luxury", "area": "area name", "price_per_night": "₹XXXX", "why": "one reason"}
-  ],
-  "famous": ["place1", "place2", "place3", "place4", "place5"],
-  "hidden": ["gem1", "gem2", "gem3", "gem4"],
-  "food": [{"name": "dish", "price": "₹XX"}, {"name": "dish", "price": "₹XX"}, {"name": "dish", "price": "₹XX"}, {"name": "dish", "price": "₹XX"}],
-  "day_plan": [
-    {
-      "day": 1,
-      "title": "Day title",
-      "morning": {"time": "7:00 AM – 10:00 AM", "activity": "what to do", "place": "place name", "tip": "quick tip"},
-      "afternoon": {"time": "11:00 AM – 3:00 PM", "activity": "what to do", "place": "place name", "tip": "quick tip"},
-      "evening": {"time": "4:00 PM – 8:00 PM", "activity": "what to do", "place": "place name", "tip": "quick tip"},
-      "food": "recommended meal for the day with restaurant/stall name"
-    }
-  ],
-  "budget_per_person": {
-    "accommodation": XXXX,
-    "food": XXXX,
-    "transport": XXXX,
-    "activities": XXXX
-  },
-  "tips": "one practical insider tip"
-}
-Generate all ${dur} days. All budget numbers are per person in INR for the full trip.`;
-
-        const response = await callGroqAI([{ role: 'user', content: prompt }]);
-        let planData;
-        try {
-            planData = JSON.parse(response.replace(/```json|```/g, '').trim());
-        } catch (e) {
-            planData = wizBuildFallback(dest, dur, cityData);
-        }
-        wizRenderResults(planData, dest, dur);
-    } catch (err) {
-        wizRenderResults(wizBuildFallback(dest, dur, cityData), dest, dur);
-    }
+.about-text .section-label-tag,
+.about-text .section-title-main {
+  text-align: left;
 }
 
-function wizBuildFallback(destination, days, cityData) {
-    const d = cityData || {
-        famous: [`${destination} Heritage Site`, `${destination} City Centre`, `${destination} Museum`, 'Local Market', 'Viewpoint'],
-        hidden: ['Old town lanes', 'Local village nearby', 'Scenic route', 'Sunrise point'],
-        food: [{ name: 'Local Thali', price: '₹80' }, { name: 'Street Snacks', price: '₹30' }, { name: 'Regional Curry', price: '₹150' }],
-        per_day: { budget: 1000, normal: 3000, luxury: 8000 },
-        tips: `Hire a local guide for the best experience in ${destination}.`
-    };
-    const perDay = d.per_day?.[wizState.budget] || 3000;
-    const totalDays = Math.min(days, 7);
-    const allSpots = [...(d.famous || []), ...(d.hidden || [])];
-    return {
-        city: destination, tagline: `Discover the wonders of ${destination}`,
-        famous: d.famous, hidden: d.hidden, food: d.food,
-        day_plan: Array.from({ length: totalDays }, (_, i) => ({
-            day: i + 1, title: `Day ${i + 1} in ${destination}`,
-            morning: `Visit ${allSpots[i * 2 % allSpots.length]}`,
-            afternoon: 'Explore local markets and cafes',
-            evening: `Evening at ${allSpots[(i * 2 + 1) % allSpots.length]}`,
-            food: (d.food[i % d.food.length]?.name || 'Local cuisine') + ' for dinner'
-        })),
-        budget: {
-            accommodation: Math.round(perDay * 0.4) * totalDays,
-            food: Math.round(perDay * 0.25) * totalDays,
-            transport: Math.round(perDay * 0.2) * totalDays,
-            activities: Math.round(perDay * 0.15) * totalDays
-        },
-        tips: d.tips || `Enjoy your trip to ${destination}!`
-    };
+.about-text p {
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: .85rem;
+  font-size: .88rem;
 }
 
-function wizRenderResults(plan, destination, duration) {
-    document.querySelectorAll('.wiz-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('wizStepBar').style.display = 'none';
-    document.getElementById('wizResultPanel').classList.add('active');
-
-    const budgetData = plan.budget_per_person || plan.budget || {};
-    const total = Object.values(budgetData).reduce((a, b) => a + b, 0);
-    const people = wizState.adults + wizState.children;
-    const totalAll = total * people;
-    const budgetLabel = wizState.customBudget
-        ? `Custom ₹${wizState.customBudget.toLocaleString('en-IN')}/person`
-        : { budget: 'Budget 🎒', normal: 'Mid-Range ✈️', luxury: 'Luxury 👑' }[wizState.budget] || '';
-    const foodLabel = { veg: '🥗 Veg', both: '🍱 All Food' }[wizState.food] || '';
-
-    document.getElementById('wizResultTitle').textContent = `Your ${plan.city || destination} Plan ✦`;
-    document.getElementById('wizResultSubtitle').textContent =
-        `${duration} days · ${budgetLabel} · ${people} traveller${people > 1 ? 's' : ''}`;
-
-    const bTotal = total || 1;
-    const bPct = (v) => Math.round(((v || 0) / bTotal) * 100);
-
-    const hotelsHtml = (plan.hotels && plan.hotels.length) ? `
-    <div class="plan-card plan-card-full">
-      <div class="plan-card-header plan-card-header--teal">
-        <span class="plan-card-icon">🏨</span>
-        <h4>Hotel Suggestions</h4>
-      </div>
-      <div class="plan-hotels-grid">
-        ${plan.hotels.map(h => `
-        <div class="plan-hotel-card">
-          <div class="plan-hotel-top">
-            <div class="plan-hotel-name">${h.name}</div>
-            <div class="plan-hotel-badge">${h.type || ''}</div>
-          </div>
-          <div class="plan-hotel-area">📍 ${h.area || ''}</div>
-          <div class="plan-hotel-price">₹ ${h.price_per_night || ''} <span>/night</span></div>
-          <div class="plan-hotel-why">✦ ${h.why || ''}</div>
-        </div>`).join('')}
-      </div>
-    </div>` : '';
-
-    const transportHtml = (plan.transport) ? `
-    <div class="plan-card plan-card-full plan-transport-card">
-      <div class="plan-card-header plan-card-header--blue">
-        <span class="plan-card-icon">🚆</span>
-        <h4>How to Get There</h4>
-      </div>
-      <div class="plan-transport-grid">
-        ${plan.transport.how_to_reach ? `<div class="plan-transport-item"><span class="plan-transport-icon">✈️🚆</span><div><div class="plan-transport-label">Best Route</div><div class="plan-transport-val">${plan.transport.how_to_reach}</div></div></div>` : ''}
-        ${plan.transport.train ? `<div class="plan-transport-item"><span class="plan-transport-icon">🚂</span><div><div class="plan-transport-label">Train</div><div class="plan-transport-val">${plan.transport.train}</div></div></div>` : ''}
-        ${plan.transport.local_transport ? `<div class="plan-transport-item"><span class="plan-transport-icon">🛺</span><div><div class="plan-transport-label">Local Transport</div><div class="plan-transport-val">${plan.transport.local_transport}</div></div></div>` : ''}
-      </div>
-    </div>` : '';
-
-    document.getElementById('wizResultCards').innerHTML = `
-    <div class="plan-stats-strip">
-      <div class="plan-stat"><div class="plan-stat-val">${duration}</div><div class="plan-stat-lbl">Days</div></div>
-      <div class="plan-stat-div"></div>
-      <div class="plan-stat"><div class="plan-stat-val">${people}</div><div class="plan-stat-lbl">Traveller${people > 1 ? 's' : ''}</div></div>
-      <div class="plan-stat-div"></div>
-      <div class="plan-stat"><div class="plan-stat-val">₹${(total / 1000).toFixed(1)}k</div><div class="plan-stat-lbl">Per Person</div></div>
-      <div class="plan-stat-div"></div>
-      <div class="plan-stat"><div class="plan-stat-val">₹${(totalAll / 1000).toFixed(1)}k</div><div class="plan-stat-lbl">Total (${people})</div></div>
-    </div>
-
-    ${transportHtml}
-
-    <div class="plan-grid-2">
-      <div class="plan-card">
-        <div class="plan-card-header plan-card-header--teal">
-          <span class="plan-card-icon">🏛️</span>
-          <h4>Famous Places</h4>
-        </div>
-        <ul class="plan-list">
-          ${(plan.famous || []).map((p, i) => `
-          <li class="plan-list-item">
-            <span class="plan-list-num">${i + 1}</span>
-            <span>${p}</span>
-          </li>`).join('')}
-        </ul>
-      </div>
-
-      <div class="plan-card">
-        <div class="plan-card-header plan-card-header--gold">
-          <span class="plan-card-icon">💎</span>
-          <h4>Hidden Gems</h4>
-        </div>
-        <ul class="plan-list">
-          ${(plan.hidden || []).map((p, i) => `
-          <li class="plan-list-item">
-            <span class="plan-list-gem">✦</span>
-            <span>${p}</span>
-          </li>`).join('')}
-        </ul>
-      </div>
-
-      <div class="plan-card">
-        <div class="plan-card-header plan-card-header--orange">
-          <span class="plan-card-icon">🍜</span>
-          <h4>Must-Try Food</h4>
-        </div>
-        <div class="plan-food-list">
-          ${(plan.food || []).map(f => `
-          <div class="plan-food-item">
-            <span class="plan-food-name">${f.name}</span>
-            <span class="plan-food-price">${f.price || ''}</span>
-          </div>`).join('')}
-        </div>
-      </div>
-
-      <div class="plan-card">
-        <div class="plan-card-header plan-card-header--purple">
-          <span class="plan-card-icon">💰</span>
-          <h4>Budget — Per Person</h4>
-        </div>
-        <div class="plan-budget-list">
-          <div class="plan-budget-row">
-            <span class="plan-budget-icon">🏨</span>
-            <div class="plan-budget-bar-wrap">
-              <div class="plan-budget-label-row"><span>Accommodation</span><span class="plan-budget-amt">₹${(budgetData.accommodation || 0).toLocaleString()}</span></div>
-              <div class="plan-budget-bar"><div class="plan-budget-fill" style="width:${bPct(budgetData.accommodation)}%;background:var(--lc)"></div></div>
-            </div>
-          </div>
-          <div class="plan-budget-row">
-            <span class="plan-budget-icon">🍽️</span>
-            <div class="plan-budget-bar-wrap">
-              <div class="plan-budget-label-row"><span>Food</span><span class="plan-budget-amt">₹${(budgetData.food || 0).toLocaleString()}</span></div>
-              <div class="plan-budget-bar"><div class="plan-budget-fill" style="width:${bPct(budgetData.food)}%;background:#f59e0b"></div></div>
-            </div>
-          </div>
-          <div class="plan-budget-row">
-            <span class="plan-budget-icon">🚆</span>
-            <div class="plan-budget-bar-wrap">
-              <div class="plan-budget-label-row"><span>Transport</span><span class="plan-budget-amt">₹${(budgetData.transport || 0).toLocaleString()}</span></div>
-              <div class="plan-budget-bar"><div class="plan-budget-fill" style="width:${bPct(budgetData.transport)}%;background:#8b5cf6"></div></div>
-            </div>
-          </div>
-          <div class="plan-budget-row">
-            <span class="plan-budget-icon">🎭</span>
-            <div class="plan-budget-bar-wrap">
-              <div class="plan-budget-label-row"><span>Activities</span><span class="plan-budget-amt">₹${(budgetData.activities || 0).toLocaleString()}</span></div>
-              <div class="plan-budget-bar"><div class="plan-budget-fill" style="width:${bPct(budgetData.activities)}%;background:#ec4899"></div></div>
-            </div>
-          </div>
-          <div class="plan-budget-total">
-            <span>Per Person</span><span>₹${total.toLocaleString()}</span>
-          </div>
-          ${people > 1 ? `<div class="plan-budget-total plan-budget-all" style="border-top:1px dashed var(--border);margin-top:.3rem;padding-top:.5rem;color:var(--uv)">
-            <span>Total (${people} people)</span><span>₹${totalAll.toLocaleString()}</span>
-          </div>` : ''}
-        </div>
-      </div>
-    </div>
-
-    ${hotelsHtml}
-
-    <div class="plan-card plan-card-full">
-      <div class="plan-card-header plan-card-header--blue">
-        <span class="plan-card-icon">📅</span>
-        <h4>Day-by-Day Itinerary</h4>
-      </div>
-      <div class="plan-days-grid">
-        ${(plan.day_plan || []).map(d => {
-        const morning = typeof d.morning === 'object' ? d.morning : { time: '7:00 AM – 11:00 AM', activity: d.morning, place: '', tip: '' };
-        const afternoon = typeof d.afternoon === 'object' ? d.afternoon : { time: '11:00 AM – 3:00 PM', activity: d.afternoon, place: '', tip: '' };
-        const evening = typeof d.evening === 'object' ? d.evening : { time: '4:00 PM – 8:00 PM', activity: d.evening, place: '', tip: '' };
-        return `
-        <div class="plan-day-card">
-          <div class="plan-day-badge">Day ${d.day}</div>
-          <div class="plan-day-title">${d.title || `Day ${d.day} in ${plan.city || destination}`}</div>
-          <div class="plan-day-activities">
-            <div class="plan-day-act">
-              <span class="plan-day-act-dot plan-day-act-dot--morning"></span>
-              <div>
-                <span class="plan-act-label">🌅 Morning</span>
-                <span class="plan-act-time">${morning.time || ''}</span>
-                <p>${morning.activity || ''}${morning.place ? ` — <em>${morning.place}</em>` : ''}${morning.tip ? `<br><small class="plan-act-tip">💡 ${morning.tip}</small>` : ''}</p>
-              </div>
-            </div>
-            <div class="plan-day-act">
-              <span class="plan-day-act-dot plan-day-act-dot--afternoon"></span>
-              <div>
-                <span class="plan-act-label">☀️ Afternoon</span>
-                <span class="plan-act-time">${afternoon.time || ''}</span>
-                <p>${afternoon.activity || ''}${afternoon.place ? ` — <em>${afternoon.place}</em>` : ''}${afternoon.tip ? `<br><small class="plan-act-tip">💡 ${afternoon.tip}</small>` : ''}</p>
-              </div>
-            </div>
-            <div class="plan-day-act">
-              <span class="plan-day-act-dot plan-day-act-dot--evening"></span>
-              <div>
-                <span class="plan-act-label">🌙 Evening</span>
-                <span class="plan-act-time">${evening.time || ''}</span>
-                <p>${evening.activity || ''}${evening.place ? ` — <em>${evening.place}</em>` : ''}${evening.tip ? `<br><small class="plan-act-tip">💡 ${evening.tip}</small>` : ''}</p>
-              </div>
-            </div>
-            ${d.food ? `<div class="plan-day-act"><span class="plan-day-act-dot plan-day-act-dot--food"></span><div><span class="plan-act-label">🍽️ Food</span><p>${d.food}</p></div></div>` : ''}
-          </div>
-        </div>`;
-    }).join('')}
-      </div>
-    </div>
-
-    ${plan.tips ? `
-    <div class="plan-card plan-card-full plan-tips-card">
-      <div class="plan-tips-icon">💡</div>
-      <div>
-        <div class="plan-tips-label">Local Insider Tip</div>
-        <p class="plan-tips-text">${plan.tips}</p>
-      </div>
-    </div>` : ''}`;
-
-    document.getElementById('wizFooter').innerHTML = `
-      <button class="wiz-btn-back" onclick="wizReset()">← Plan Another</button>
-      <span class="wiz-step-count">✦ Plan Generated</span>
-      <button class="wiz-btn-next wiz-btn-pdf" onclick="wizDownloadPDF()">📄 Download PDF</button>`;
-
-    document.getElementById('wizResultPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window._lastPlanData = { plan, destination, duration, wizState: { ...wizState }, total, totalAll, budgetLabel, foodLabel };
+.about-values {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  margin-top: 1.25rem;
 }
 
-function wizDownloadPDF() {
-    const btn = document.querySelector('.wiz-btn-pdf');
-    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Generating...'; }
-
-    const { plan, destination, duration, total, budgetLabel, foodLabel } = window._lastPlanData || {};
-    const people = wizState.adults + wizState.children;
-    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const isDark = theme === 'dark';
-
-    const bg = isDark ? '#0a1412' : '#ffffff';
-    const cardBg = isDark ? '#0f1e1b' : '#f8fffe';
-    const cardBorder = isDark ? '#1e3832' : '#d1ede8';
-    const text = isDark ? '#e8f5f2' : '#0f2e28';
-    const textMuted = isDark ? '#7fb8ac' : '#4a8c7e';
-    const accent = '#3a8c7e';
-    const gold = '#c9a84c';
-
-    const style = `
-      @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap');
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: 'DM Sans', sans-serif; background: ${bg}; color: ${text}; padding: 32px; font-size: 13px; line-height: 1.6; }
-      .header { text-align: center; margin-bottom: 28px; padding: 28px; background: ${cardBg}; border-radius: 16px; border: 1px solid ${cardBorder}; }
-      .header-title { font-size: 28px; font-weight: 700; color: ${accent}; margin-bottom: 6px; }
-      .header-sub { color: ${textMuted}; font-size: 13px; }
-      .stats-strip { display: flex; gap: 12px; margin-bottom: 20px; }
-      .stat-box { flex: 1; background: ${cardBg}; border: 1px solid ${cardBorder}; border-radius: 12px; padding: 14px; text-align: center; }
-      .stat-val { font-size: 20px; font-weight: 700; color: ${accent}; }
-      .stat-lbl { font-size: 10px; color: ${textMuted}; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
-      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-      .card { background: ${cardBg}; border: 1px solid ${cardBorder}; border-radius: 14px; overflow: hidden; break-inside: avoid; }
-      .card-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid ${cardBorder}; }
-      .card-head-icon { font-size: 16px; }
-      .card-head-title { font-size: 13px; font-weight: 700; color: ${accent}; text-transform: uppercase; letter-spacing: .5px; }
-      .card-body { padding: 14px 16px; }
-      ul.plist { list-style: none; }
-      ul.plist li { padding: 5px 0; border-bottom: 1px solid ${cardBorder}; display: flex; align-items: center; gap: 8px; font-size: 12px; }
-      ul.plist li:last-child { border-bottom: none; }
-      .num { width: 20px; height: 20px; background: ${accent}; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
-      .gem { color: ${gold}; font-size: 11px; flex-shrink: 0; }
-      .food-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid ${cardBorder}; font-size: 12px; }
-      .food-row:last-child { border-bottom: none; }
-      .food-price { color: ${accent}; font-weight: 700; }
-      .bud-row { margin-bottom: 10px; }
-      .bud-label-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
-      .bud-bar { height: 6px; background: ${isDark ? '#1e3832' : '#e0f0ec'}; border-radius: 3px; overflow: hidden; }
-      .bud-fill { height: 100%; border-radius: 3px; }
-      .bud-total { margin-top: 12px; padding-top: 10px; border-top: 1px solid ${cardBorder}; display: flex; justify-content: space-between; font-weight: 700; color: ${accent}; font-size: 14px; }
-      .full-card { grid-column: 1 / -1; }
-      .days-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 14px 16px; }
-      .day-card { background: ${isDark ? '#0a1412' : '#f0fbf8'}; border: 1px solid ${cardBorder}; border-radius: 10px; padding: 12px; break-inside: avoid; }
-      .day-badge { display: inline-block; background: ${accent}; color: #fff; border-radius: 6px; padding: 2px 9px; font-size: 10px; font-weight: 700; margin-bottom: 5px; }
-      .day-title { font-size: 12px; font-weight: 700; color: ${text}; margin-bottom: 8px; }
-      .day-act { display: flex; gap: 7px; margin-bottom: 5px; align-items: flex-start; }
-      .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
-      .dot-m { background: #f59e0b; }
-      .dot-a { background: ${accent}; }
-      .dot-e { background: #8b5cf6; }
-      .dot-f { background: #ec4899; }
-      .act-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: ${textMuted}; letter-spacing: .4px; display: block; }
-      .act-text { font-size: 11px; color: ${text}; }
-      .tips-card { display: flex; gap: 14px; align-items: flex-start; padding: 16px; background: ${cardBg}; border: 1px solid ${cardBorder}; border-left: 4px solid ${gold}; border-radius: 14px; margin-top: 20px; }
-      .tips-icon { font-size: 22px; flex-shrink: 0; }
-      .tips-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: ${gold}; letter-spacing: .5px; margin-bottom: 4px; }
-      .tips-text { font-size: 12px; color: ${textMuted}; line-height: 1.6; }
-      .footer-note { text-align: center; margin-top: 24px; font-size: 10px; color: ${textMuted}; }
-      @media print { body { padding: 16px; } }
-    `;
-
-    const bPct = (v) => Math.round(((v || 0) / (total || 1)) * 100);
-    const city = plan.city || destination;
-
-    const htmlContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><title>${city} Trip Plan</title><style>${style}</style></head><body>
-    <div class="header">
-      <div class="header-title">✦ ${city} Trip Plan</div>
-      <div class="header-sub">${plan.tagline || `Discover the wonders of ${city}`}</div>
-    </div>
-    <div class="stats-strip">
-      <div class="stat-box"><div class="stat-val">${duration}</div><div class="stat-lbl">Days</div></div>
-      <div class="stat-box"><div class="stat-val">${people}</div><div class="stat-lbl">Travellers</div></div>
-      <div class="stat-box"><div class="stat-val">₹${(total / 1000).toFixed(1)}k</div><div class="stat-lbl">Est. Budget</div></div>
-      <div class="stat-box"><div class="stat-val">${foodLabel || '🍽️'}</div><div class="stat-lbl">Food Pref</div></div>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-head"><span class="card-head-icon">🏛️</span><span class="card-head-title">Famous Places</span></div>
-        <div class="card-body"><ul class="plist">${(plan.famous || []).map((p, i) => `<li><span class="num">${i + 1}</span>${p}</li>`).join('')}</ul></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-head-icon">💎</span><span class="card-head-title">Hidden Gems</span></div>
-        <div class="card-body"><ul class="plist">${(plan.hidden || []).map(p => `<li><span class="gem">✦</span>${p}</li>`).join('')}</ul></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-head-icon">🍜</span><span class="card-head-title">Must-Try Food</span></div>
-        <div class="card-body">${(plan.food || []).map(f => `<div class="food-row"><span>${f.name}</span><span class="food-price">${f.price || ''}</span></div>`).join('')}</div>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-head-icon">💰</span><span class="card-head-title">Budget Breakdown</span></div>
-        <div class="card-body">
-          <div class="bud-row"><div class="bud-label-row"><span>🏨 Accommodation</span><span>₹${(plan.budget?.accommodation || 0).toLocaleString()}</span></div><div class="bud-bar"><div class="bud-fill" style="width:${bPct(plan.budget?.accommodation)}%;background:${accent}"></div></div></div>
-          <div class="bud-row"><div class="bud-label-row"><span>🍽️ Food</span><span>₹${(plan.budget?.food || 0).toLocaleString()}</span></div><div class="bud-bar"><div class="bud-fill" style="width:${bPct(plan.budget?.food)}%;background:#f59e0b"></div></div></div>
-          <div class="bud-row"><div class="bud-label-row"><span>🚗 Transport</span><span>₹${(plan.budget?.transport || 0).toLocaleString()}</span></div><div class="bud-bar"><div class="bud-fill" style="width:${bPct(plan.budget?.transport)}%;background:#8b5cf6"></div></div></div>
-          <div class="bud-row"><div class="bud-label-row"><span>🎭 Activities</span><span>₹${(plan.budget?.activities || 0).toLocaleString()}</span></div><div class="bud-bar"><div class="bud-fill" style="width:${bPct(plan.budget?.activities)}%;background:#ec4899"></div></div></div>
-          <div class="bud-total"><span>Total Estimate</span><span>₹${total.toLocaleString()}</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="card full-card">
-      <div class="card-head"><span class="card-head-icon">📅</span><span class="card-head-title">Day-by-Day Itinerary</span></div>
-      <div class="days-grid">
-        ${(plan.day_plan || []).map(d => `
-        <div class="day-card">
-          <div class="day-badge">Day ${d.day}</div>
-          <div class="day-title">${d.title || `Day ${d.day} in ${city}`}</div>
-          <div class="day-act"><span class="dot dot-m"></span><div><span class="act-label">Morning</span><span class="act-text">${d.morning}</span></div></div>
-          <div class="day-act"><span class="dot dot-a"></span><div><span class="act-label">Afternoon</span><span class="act-text">${d.afternoon}</span></div></div>
-          <div class="day-act"><span class="dot dot-e"></span><div><span class="act-label">Evening</span><span class="act-text">${d.evening}</span></div></div>
-          ${d.food ? `<div class="day-act"><span class="dot dot-f"></span><div><span class="act-label">Food</span><span class="act-text">${d.food}</span></div></div>` : ''}
-        </div>`).join('')}
-      </div>
-    </div>
-    ${plan.tips ? `<div class="tips-card"><span class="tips-icon">💡</span><div><div class="tips-label">Local Insider Tip</div><p class="tips-text">${plan.tips}</p></div></div>` : ''}
-    <div class="footer-note">Generated by Plan Your Trip India · planyyourtripindia.com</div>
-    </body></html>`;
-
-    const printWin = window.open('', '_blank', 'width=900,height=700');
-    if (!printWin) {
-        showToast('Please allow pop-ups to download PDF', 'error');
-        if (btn) { btn.disabled = false; btn.innerHTML = '📄 Download PDF'; }
-        return;
-    }
-    printWin.document.write(htmlContent);
-    printWin.document.close();
-    printWin.onload = () => {
-        setTimeout(() => {
-            printWin.print();
-            printWin.close();
-            if (btn) { btn.disabled = false; btn.innerHTML = '📄 Download PDF'; }
-        }, 500);
-    };
+.about-value {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  color: var(--text-muted);
+  font-size: .85rem;
 }
 
-function wizReset() {
-    location.reload();
+.value-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lc);
+  flex-shrink: 0;
 }
 
-// ─── WIZARD INIT ─────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-    const today = new Date().toISOString().split('T')[0];
-    const df = document.getElementById('wizDateFrom');
-    const dt = document.getElementById('wizDateTo');
-    if (df) df.min = today;
-    if (dt) dt.min = today;
-    const wi = document.getElementById('wizDestInput');
-    if (wi) wi.addEventListener('input', function () { wizState.destination = this.value; });
-    const cd = document.getElementById('wizChildDown');
-    if (cd) cd.disabled = true;
-    const ad = document.getElementById('wizAdultsDown');
-    if (ad) ad.disabled = true;
-});
-
-// ─── CITY PAGE ───────────────────────────────────────────────────
-function openCityPage(key) {
-    const city = CITY_DATA[key];
-    if (!city) return;
-    currentCityKey = key;
-    document.getElementById('mainContent') && (document.getElementById('mainContent').style.display = 'none');
-    const page = document.getElementById('cityPage');
-    page.style.display = 'block';
-    page.scrollTop = 0;
-    window.scrollTo(0, 0);
-
-    const hero = document.getElementById('cityHero');
-    hero.style.backgroundImage = `url('${city.img}')`;
-    hero.style.backgroundSize = 'cover';
-    hero.style.backgroundPosition = 'center';
-
-    document.getElementById('cityBadge').textContent = city.badge;
-    document.getElementById('cityTitle').textContent = city.name;
-    document.getElementById('cityTagline').textContent = city.tagline;
-
-    document.getElementById('famousCards').innerHTML = city.famous.map(p => `
-    <div class="city-info-card"><div class="card-icon">🏛️</div><h4>${p}</h4><p>Must-visit attraction in ${city.name}</p></div>
-  `).join('');
-
-    document.getElementById('foodCards').innerHTML = city.food.map(f => `
-    <div class="city-info-card"><div class="card-icon">🍜</div><h4>${f.name}</h4><p>Local street food delicacy</p><span class="price-tag">${f.price}</span></div>
-  `).join('');
-
-    document.getElementById('hiddenCards').innerHTML = city.hidden.map(p => `
-    <div class="city-info-card"><div class="card-icon">💎</div><h4>${p}</h4><p>Hidden gem locals love</p></div>
-  `).join('');
-
-    document.getElementById('hotelCards').innerHTML = city.hotels.map(h => `
-    <div class="city-info-card"><div class="card-icon">🏨</div><h4>${h}</h4><p>Recommended stay in ${city.name}</p></div>
-  `).join('');
-
-    document.querySelectorAll('.city-tab').forEach(tab => {
-        tab.onclick = () => {
-            document.querySelectorAll('.city-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.city-tab-content').forEach(c => c.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-        };
-    });
+.about-img-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
 }
 
-function closeCityPage() {
-    document.getElementById('cityPage').style.display = 'none';
-    const mc = document.getElementById('mainContent');
-    if (mc) mc.style.display = 'block';
-    window.scrollTo(0, 0);
+.about-img-grid img {
+  border-radius: var(--radius);
+  height: 180px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  transition: transform .35s ease, box-shadow .35s ease;
 }
 
-function quickPlanCity() {
-    const city = CITY_DATA[currentCityKey];
-    if (!city) return;
-    closeCityPage();
-    wizSelectDest(city.name);
-    document.getElementById('planner').scrollIntoView({ behavior: 'smooth' });
+.about-img-grid img:nth-child(1) {
+  border-radius: 18px 6px 6px 6px;
 }
 
-function showMain() { closeCityPage(); }
-
-// ─── AI CHATBOT ──────────────────────────────────────────────────
-function toggleChat() {
-    const win = document.getElementById('chatWindow');
-    win.classList.toggle('open');
-    const notif = document.getElementById('chatNotif');
-    if (notif) notif.style.display = 'none';
+.about-img-grid img:nth-child(2) {
+  border-radius: 6px 18px 6px 6px;
+  margin-top: 1.5rem;
 }
 
-function openChat() {
-    document.getElementById('chatWindow').classList.add('open');
-    const notif = document.getElementById('chatNotif');
-    if (notif) notif.style.display = 'none';
+.about-img-grid img:nth-child(3) {
+  border-radius: 6px 6px 6px 18px;
+  margin-top: -1.5rem;
 }
 
-function sendQuickMsg(msg) {
-    openChat();
-    document.getElementById('chatInput').value = msg;
-    sendMessage();
+.about-img-grid img:nth-child(4) {
+  border-radius: 6px 6px 18px 6px;
 }
 
-async function sendMessage() {
-    const input = document.getElementById('chatInput');
-    const message = input.value.trim();
-    if (!message) return;
-
-    appendChatMsg('user', '🧳', message);
-    input.value = '';
-    chatHistory.push({ role: 'user', content: message });
-
-    const typingId = showTypingIndicator();
-
-    try {
-        const response = await callGroqAI(chatHistory);
-        removeTyping(typingId);
-        appendChatMsg('bot', '🤖', response);
-        chatHistory.push({ role: 'assistant', content: response });
-        // FIX 3: Trim without locking old messages
-        if (chatHistory.length > 20) {
-            chatHistory = chatHistory.slice(-20);
-        }
-    } catch (err) {
-        removeTyping(typingId);
-        appendChatMsg('bot', '🤖', `Sorry, I couldn't connect to AI right now. ${err.message}`);
-    }
+.about-img-grid img:hover {
+  transform: scale(1.04) translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .45);
+  z-index: 2;
+  position: relative;
 }
 
-function appendChatMsg(type, avatar, text) {
-    const msgs = document.getElementById('chatMessages');
-    const div = document.createElement('div');
-    div.className = `chat-msg ${type}`;
-    div.innerHTML = `
-    <div class="msg-avatar">${avatar}</div>
-    <div class="msg-content">${formatText(text)}</div>
-  `;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
+/* ── CONTACT ── */
+.contact-section {
+  background: var(--bg);
 }
 
-function formatText(text) {
-    return text
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>');
+.contact-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
 }
 
-function showTypingIndicator() {
-    const msgs = document.getElementById('chatMessages');
-    const id = 'typing-' + Date.now();
-    const div = document.createElement('div');
-    div.className = 'chat-msg bot'; div.id = id;
-    div.innerHTML = `
-    <div class="msg-avatar">🤖</div>
-    <div class="msg-content">
-      <div class="ai-typing-dots"><span></span><span></span><span></span></div>
-    </div>
-  `;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-    return id;
+.contact-form-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
 }
 
-function removeTyping(id) {
-    const el = document.getElementById(id);
-    if (el) el.remove();
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  GROQ AI — calls your secure backend proxy
-//  Server repo: https://github.com/yourusername/travel-ai-server
-//  ⬇️ Update AI_PROXY_URL to your deployed server URL
-// ═══════════════════════════════════════════════════════════════
-const AI_PROXY_URL = 'https://travel-ai-server-btgt.onrender.com/api/chat';
-
-// FIX 1: Renamed from callClaudeAI → callGroqAI so all callers work
-async function callGroqAI(messages) {
-    // Filter to only user/assistant roles
-    const apiMessages = messages
-        .filter(m => m.role === 'user' || m.role === 'assistant')
-        .map(m => ({ role: m.role, content: m.content }));
-
-    // FIX 4: Only check for empty messages, no fragile role check
-    if (!apiMessages.length) {
-        throw new Error('No messages to send');
-    }
-
-    const response = await fetch(AI_PROXY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiMessages })
-    });
-
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err?.error || `Server Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.reply || '';
+.form-group label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
-// ─── CONTACT FORM ───────────────────────────────────────────────
-function submitContact(event) {
-    event.preventDefault();
-    const success = document.getElementById('formSuccess');
-    success.style.display = 'block';
-    event.target.reset();
-    setTimeout(() => success.style.display = 'none', 5000);
+.form-input {
+  padding: .8rem 1rem;
+  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: .95rem;
+  font-family: inherit;
+  transition: all var(--transition);
+  width: 100%;
+  min-height: 50px;
 }
 
-// ─── TOAST ──────────────────────────────────────────────────────
-function showToast(message, duration = 3500) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), duration);
+.form-input:focus {
+  outline: none;
+  border-color: var(--lc);
+  box-shadow: 0 0 0 3px rgba(254, 250, 205, .12);
 }
 
-// ─── KEYBOARD ───────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        document.getElementById('chatWindow').classList.remove('open');
-        if (document.getElementById('cityPage').style.display !== 'none') closeCityPage();
-    }
-});
-
-// ════════════════════════════════════════════════
-//  AUTH — Login / Sign Up System
-// ════════════════════════════════════════════════
-let currentUser = JSON.parse(localStorage.getItem('pyti_user') || 'null');
-
-window.addEventListener('DOMContentLoaded', () => {
-    refreshNavAuth();
-
-    document.querySelectorAll('a[href^="#"]').forEach(link => {
-        link.addEventListener('click', function (e) {
-            const target = document.querySelector(this.getAttribute('href'));
-            if (!target) return;
-            e.preventDefault();
-            const navH = document.getElementById('navbar')?.offsetHeight || 70;
-            const top = target.getBoundingClientRect().top + window.scrollY - navH;
-            window.scrollTo({ top, behavior: 'smooth' });
-        }, { passive: false });
-    });
-});
-
-function refreshNavAuth() {
-    const navActions = document.getElementById('navActions');
-    if (navActions) {
-        if (currentUser) {
-            const initials = ((currentUser.first || '?')[0] + (currentUser.last || '?')[0]).toUpperCase();
-            navActions.innerHTML = `
-        <div class="nav-user-badge">
-          <div class="nav-user-avatar">${initials}</div>
-          <span>${currentUser.first}</span>
-          <button style="background:none;border:none;color:var(--text-dim);font-size:.8rem;cursor:pointer;margin-left:.3rem;" onclick="logoutUser()">↩ Out</button>
-        </div>`;
-        } else {
-            navActions.innerHTML = `
-        <button class="btn-nav-login" onclick="openModal('loginModal')">Login</button>
-        <button class="btn-nav-signup" onclick="openModal('signupModal')">Sign Up ✦</button>`;
-        }
-    }
-    if (window.updateMobileAuthUI) window.updateMobileAuthUI();
+.form-input::placeholder {
+  color: var(--text-dim);
 }
 
-function openModal(id) {
-    const modal = document.getElementById(id);
-    if (!modal) return;
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => {
-        const inp = modal.querySelector('.auth-input');
-        if (inp) inp.focus();
-    }, 350);
+.form-textarea {
+  resize: vertical;
+  min-height: 110px;
+  height: auto;
 }
 
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (!modal) return;
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-    clearAuthErrors(id);
+.form-success {
+  color: #4ade80;
+  font-size: .83rem;
+  margin-top: .4rem;
 }
 
-function switchModal(fromId, toId) {
-    closeModal(fromId);
-    setTimeout(() => openModal(toId), 200);
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
 }
 
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('auth-modal-backdrop')) {
-        closeModal(e.target.id);
-    }
-});
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        const mo = document.getElementById('navMobileOverlay');
-        if (mo && mo.classList.contains('open')) {
-            document.getElementById('hamburger').classList.remove('open');
-            mo.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-        closeModal('loginModal');
-        closeModal('signupModal');
-        if (document.getElementById('chatWindow').classList.contains('open')) {
-            document.getElementById('chatWindow').classList.remove('open');
-        }
-        if (document.getElementById('cityPage').style.display !== 'none') closeCityPage();
-    }
-});
-
-function clearAuthErrors(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-    modal.querySelectorAll('.auth-error,.auth-success').forEach(el => {
-        el.style.display = 'none';
-        el.textContent = '';
-    });
-    modal.querySelectorAll('.auth-input').forEach(el => el.value = '');
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .8rem;
 }
 
-function togglePw(inputId, btn) {
-    const inp = document.getElementById(inputId);
-    if (!inp) return;
-    if (inp.type === 'password') {
-        inp.type = 'text';
-        btn.textContent = '🙈';
-    } else {
-        inp.type = 'password';
-        btn.textContent = '👁';
-    }
+.contact-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--lc-dim);
+  border: 1px solid var(--lc-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .9rem;
+  flex-shrink: 0;
 }
 
-function checkPwStrength(pw) {
-    const fill = document.getElementById('pwStrengthFill');
-    const label = document.getElementById('pwStrengthLabel');
-    if (!fill || !label) return;
-    let score = 0;
-    if (pw.length >= 8) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-
-    const levels = [
-        { pct: '0%', color: '#f87171', text: '' },
-        { pct: '25%', color: '#f87171', text: 'Weak' },
-        { pct: '50%', color: '#fb923c', text: 'Fair' },
-        { pct: '75%', color: '#facc15', text: 'Good' },
-        { pct: '100%', color: '#4ade80', text: 'Strong ✓' },
-    ];
-    const lvl = levels[score];
-    fill.style.width = lvl.pct;
-    fill.style.background = lvl.color;
-    label.textContent = lvl.text;
-    label.style.color = lvl.color;
+.contact-item strong {
+  display: block;
+  font-size: .82rem;
+  font-weight: 600;
+  margin-bottom: .2rem;
 }
 
-function showAuthError(modalId, errorId, msg) {
-    const el = document.getElementById(errorId);
-    if (!el) return;
-    el.textContent = msg;
-    el.style.display = 'block';
+.contact-item p {
+  color: var(--text-muted);
+  font-size: .82rem;
 }
 
-function showAuthSuccess(successId, msg) {
-    const el = document.getElementById(successId);
-    if (!el) return;
-    el.textContent = msg;
-    el.style.display = 'block';
+/* ── FOOTER ── */
+.footer {
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
 }
 
-function setLoading(btnId, loading) {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    if (loading) btn.classList.add('loading');
-    else btn.classList.remove('loading');
-    btn.disabled = loading;
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
 }
 
-function handleLogin() {
-    const email = document.getElementById('loginEmail')?.value.trim();
-    const password = document.getElementById('loginPassword')?.value;
-    document.getElementById('loginError').style.display = 'none';
-
-    if (!email || !password) {
-        showAuthError('loginModal', 'loginError', '⚠ Please fill in all fields.');
-        return;
-    }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-        showAuthError('loginModal', 'loginError', '⚠ Please enter a valid email address.');
-        return;
-    }
-
-    setLoading('loginSubmitBtn', true);
-
-    setTimeout(() => {
-        setLoading('loginSubmitBtn', false);
-        const users = JSON.parse(localStorage.getItem('pyti_users') || '[]');
-        const user = users.find(u => u.email === email && u.password === btoa(password));
-        if (user) {
-            currentUser = user;
-            localStorage.setItem('pyti_user', JSON.stringify(user));
-            closeModal('loginModal');
-            refreshNavAuth();
-            showToast('🎉 Welcome back, ' + user.first + '! Ready to explore India?');
-        } else {
-            showAuthError('loginModal', 'loginError', '✕ Invalid email or password. Please try again.');
-        }
-    }, 1200);
+.footer-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--lc);
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
 }
 
-function handleSignup() {
-    const first = document.getElementById('signupFirst')?.value.trim();
-    const last = document.getElementById('signupLast')?.value.trim();
-    const email = document.getElementById('signupEmail')?.value.trim();
-    const password = document.getElementById('signupPassword')?.value;
-
-    document.getElementById('signupError').style.display = 'none';
-    document.getElementById('signupSuccess').style.display = 'none';
-
-    if (!first || !last || !email || !password) {
-        showAuthError('signupModal', 'signupError', '⚠ Please fill in all fields.');
-        return;
-    }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-        showAuthError('signupModal', 'signupError', '⚠ Please enter a valid email address.');
-        return;
-    }
-    if (password.length < 8) {
-        showAuthError('signupModal', 'signupError', '⚠ Password must be at least 8 characters.');
-        return;
-    }
-
-    setLoading('signupSubmitBtn', true);
-
-    setTimeout(() => {
-        setLoading('signupSubmitBtn', false);
-        const users = JSON.parse(localStorage.getItem('pyti_users') || '[]');
-        if (users.find(u => u.email === email)) {
-            showAuthError('signupModal', 'signupError', '✕ An account with this email already exists.');
-            return;
-        }
-        const newUser = { first, last, email, password: btoa(password), joined: new Date().toISOString() };
-        users.push(newUser);
-        localStorage.setItem('pyti_users', JSON.stringify(users));
-        currentUser = newUser;
-        localStorage.setItem('pyti_user', JSON.stringify(newUser));
-        showAuthSuccess('signupSuccess', '🎉 Account created! Welcome to Plan Your Trip India!');
-        setTimeout(() => {
-            closeModal('signupModal');
-            refreshNavAuth();
-            showToast('🎉 Welcome aboard, ' + first + '! Start planning your dream trip!');
-        }, 1600);
-    }, 1400);
+.footer-logo-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
 }
 
-function handleSocialLogin(provider) {
-    showToast('🔗 ' + provider + ' login coming soon!');
+.footer-brand p {
+  color: var(--text-muted);
+  font-size: .83rem;
+  line-height: 1.65;
+  margin-bottom: 1.2rem;
 }
 
-function logoutUser() {
-    currentUser = null;
-    localStorage.removeItem('pyti_user');
-    refreshNavAuth();
-    showToast('👋 Logged out. Come back soon!');
+.social-links {
+  display: flex;
+  gap: .5rem;
+}
+
+.social-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: all var(--transition);
+}
+
+.social-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.social-btn:hover {
+  background: var(--lc);
+  color: var(--uv);
+  border-color: var(--lc);
+}
+
+.footer-cols-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.footer-col h4 {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: .9rem;
+}
+
+.footer-col ul {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.footer-col ul li a {
+  color: var(--text-muted);
+  font-size: .83rem;
+  transition: all var(--transition);
+}
+
+.footer-col ul li a:hover {
+  color: var(--lc);
+}
+
+.footer-col p {
+  color: var(--text-muted);
+  font-size: .83rem;
+  line-height: 1.65;
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-bottom p {
+  color: var(--text-dim);
+  font-size: .78rem;
+}
+
+/* ── WELCOME OVERLAY ── */
+#welcomeOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: linear-gradient(135deg, var(--uv) 0%, var(--uv-dark) 55%, #0f0c1a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity .8s ease, visibility .8s;
+}
+
+#welcomeOverlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  display: none;
+}
+
+.welcome-word {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 10vw, 5rem);
+  font-weight: 700;
+  color: var(--lc);
+  letter-spacing: 3px;
+  text-align: center;
+  animation: welcomeFadeSlide .6s ease forwards;
+  text-shadow: 0 0 60px rgba(254, 250, 205, .25);
+  position: absolute;
+  opacity: 0;
+}
+
+.welcome-lang {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .83rem;
+  color: rgba(254, 250, 205, .55);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-align: center;
+  position: absolute;
+  top: calc(50% + clamp(1.8rem, 5vw, 3.5rem));
+  animation: welcomeFadeSlide .6s ease forwards;
+  opacity: 0;
+}
+
+@keyframes welcomeFadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(20px)
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(0)
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateY(0)
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-20px)
+  }
+}
+
+.welcome-dots {
+  position: absolute;
+  bottom: 2rem;
+  display: flex;
+  gap: .4rem;
+}
+
+.welcome-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(254, 250, 205, .3);
+  transition: background .3s;
+}
+
+.welcome-dot.active {
+  background: var(--lc);
+}
+
+/* ── CITY PAGE ── */
+#cityPage {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: var(--bg);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: none;
+}
+
+.city-page-inner {
+  min-height: 100vh;
+}
+
+.city-hero {
+  position: relative;
+  height: 42vh;
+  min-height: 240px;
+  background: linear-gradient(135deg, var(--uv), var(--uv-light));
+  overflow: hidden;
+}
+
+.city-hero-blur-layer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, .25), rgba(0, 0, 0, .62));
+  pointer-events: none;
+}
+
+.city-hero-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.25rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.city-back-btn {
+  position: absolute;
+  top: calc(.85rem + var(--safe-top));
+  left: .85rem;
+  padding: .5rem .9rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .15);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: .8rem;
+  border: 1px solid rgba(255, 255, 255, .2);
+  transition: all var(--transition);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.city-back-btn:hover,
+.city-back-btn:active {
+  background: rgba(255, 255, 255, .3);
+}
+
+.city-badge-hero {
+  display: inline-block;
+  padding: .25rem .65rem;
+  border-radius: 99px;
+  background: var(--lc);
+  color: var(--uv);
+  font-size: .7rem;
+  font-weight: 700;
+  margin-bottom: .55rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.city-hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 10vw, 4rem);
+  color: #fff;
+  letter-spacing: 2px;
+  margin-bottom: .4rem;
+}
+
+.city-hero-tagline {
+  color: rgba(255, 255, 255, .75);
+  font-size: .85rem;
+  margin-bottom: 1rem;
+}
+
+.city-plan-btn {
+  align-self: flex-start;
+  min-height: 44px;
+  font-size: .88rem;
+  padding: .7rem 1.2rem;
+}
+
+.city-tabs-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.city-tabs {
+  display: flex;
+  gap: .25rem;
+  margin-bottom: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.city-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.city-tab {
+  padding: .55rem .85rem;
+  border-radius: 6px 6px 0 0;
+  white-space: nowrap;
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  transition: all var(--transition);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.city-tab:hover {
+  color: var(--text);
+}
+
+.city-tab.active {
+  color: var(--lc);
+  background: var(--bg-2);
+  border-color: var(--border);
+  border-bottom: 1px solid var(--bg-2);
+  margin-bottom: -1px;
+}
+
+.city-tab-content {
+  display: none;
+}
+
+.city-tab-content.active {
+  display: block;
+}
+
+.city-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .65rem;
+}
+
+.city-info-card {
+  padding: .9rem;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+
+.city-info-card:hover {
+  border-color: var(--lc-border);
+}
+
+.city-info-card h4 {
+  font-size: .88rem;
+  margin-bottom: .4rem;
+}
+
+.city-info-card p {
+  color: var(--text-muted);
+  font-size: .78rem;
+  line-height: 1.55;
+}
+
+.city-info-card .card-icon {
+  font-size: 1.2rem;
+  margin-bottom: .55rem;
+}
+
+.city-info-card .price-tag {
+  display: inline-block;
+  margin-top: .4rem;
+  padding: .15rem .5rem;
+  border-radius: 99px;
+  background: var(--lc-dim);
+  color: var(--lc);
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+/* ── CHATBOT ── */
+.chatbot-container {
+  position: fixed;
+  bottom: calc(1rem + var(--safe-bottom));
+  right: calc(.85rem + var(--safe-right));
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .75rem;
+}
+
+.chatbot-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  padding: 0;
+  background: linear-gradient(135deg, var(--uv), var(--uv-light));
+  color: black;
+  border: 1px solid var(--lc-border);
+  box-shadow: 0 8px 26px rgba(95, 74, 139, .55);
+  transition: all var(--transition);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatbot-btn:hover {
+  box-shadow: 0 12px 36px rgba(95, 74, 139, .65);
+}
+
+.chatbot-btn>span:not(.chatbot-icon):not(.chat-notif) {
+  display: none;
+}
+
+.chatbot-icon {
+  font-size: 1.35rem;
+}
+
+.chat-notif {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f87171;
+  color: #fff;
+  font-size: .58rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg);
+}
+
+.chatbot-window {
+  width: calc(100vw - 1.5rem);
+  max-height: calc(100svh - 130px);
+  height: 500px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transform: scale(.9) translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.chatbot-window.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.chat-header {
+  padding: .85rem 1rem;
+  background: linear-gradient(135deg, var(--uv), var(--uv-light));
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  flex-shrink: 0;
+}
+
+.chat-avatar {
+  font-size: 1.35rem;
+}
+
+.chat-header-info h4 {
+  font-size: .85rem;
+  font-weight: 600;
+  color: #50a089;
+}
+
+.chat-status {
+  font-size: .68rem;
+  color: rgba(255, 255, 255, .75);
+}
+
+.chat-close {
+  margin-left: auto;
+  background: rgba(255, 255, 255, .15);
+  border: none;
+  color: #50a089;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  transition: background var(--transition);
+}
+
+.chat-close:hover,
+.chat-close:active {
+  background: rgba(255, 255, 255, .3);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: .85rem;
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 2px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+
+.chat-msg {
+  display: flex;
+  gap: .4rem;
+  align-items: flex-start;
+}
+
+.chat-msg.user {
+  flex-direction: row-reverse;
+}
+
+.msg-avatar {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.msg-content {
+  max-width: 84%;
+  padding: .6rem .85rem;
+  border-radius: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  font-size: .8rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.chat-msg.user .msg-content {
+  background: linear-gradient(135deg, var(--uv), var(--uv-light));
+  border: none;
+  color: #fff;
+}
+
+.chat-input-area {
+  padding: .55rem .85rem .85rem;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chat-suggestions {
+  display: flex;
+  gap: .3rem;
+  flex-wrap: wrap;
+  margin-bottom: .45rem;
+}
+
+.chat-suggestions button {
+  padding: .28rem .6rem;
+  border-radius: 99px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: .68rem;
+  transition: all var(--transition);
+  white-space: nowrap;
+  min-height: 30px;
+}
+
+.chat-suggestions button:hover,
+.chat-suggestions button:active {
+  border-color: var(--lc);
+  color: var(--lc);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: .4rem;
+}
+
+#chatInput {
+  flex: 1;
+  padding: .6rem .85rem;
+  border-radius: 99px;
+  background: var(--bg-3);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: .9rem;
+  font-family: inherit;
+  transition: all var(--transition);
+  min-height: 42px;
+}
+
+#chatInput:focus {
+  outline: none;
+  border-color: var(--lc);
+}
+
+#chatInput::placeholder {
+  color: var(--text-dim);
+}
+
+.chat-send {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--uv), var(--uv-light));
+  color: black;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  border: 1px solid var(--lc-border);
+}
+
+.chat-send:hover,
+.chat-send:active {
+  transform: scale(1.1);
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 4.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: .6rem 1.25rem;
+  font-size: .82rem;
+  z-index: 3000;
+  opacity: 0;
+  transition: all var(--transition);
+  white-space: normal;
+  text-align: center;
+  max-width: calc(100vw - 2rem);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── INSTALL BANNER — hidden, not used ── */
+.install-banner {
+  display: none !important;
+}
+
+/* ── THEME TOGGLE — always visible in header ── */
+.btn-theme-toggle {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  z-index: 1002;
+  order: 1;
+}
+
+.toggle-track {
+  position: relative;
+  width: 58px;
+  height: 30px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #0a1412, #162824);
+  border: 1.5px solid rgba(171, 209, 198, 0.25);
+  display: flex;
+  align-items: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+[data-theme="light"] .toggle-track {
+  background: linear-gradient(135deg, #dff0ec, #FAFAFA);
+  border-color: rgba(171, 209, 198, 0.55);
+  box-shadow: 0 2px 12px rgba(171, 209, 198, 0.22), inset 0 1px 3px rgba(171, 209, 198, 0.12);
+}
+
+.toggle-thumb {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ABD1C6, #5aaa9c);
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+
+[data-theme="light"] .toggle-thumb {
+  left: calc(100% - 26px);
+  background: linear-gradient(135deg, #3a8c7e, #ABD1C6);
+  box-shadow: 0 2px 8px rgba(58, 140, 126, 0.40);
+}
+
+.toggle-moon,
+.toggle-sun {
+  position: absolute;
+  font-size: 0.7rem;
+  line-height: 1;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+.toggle-moon {
+  left: 7px;
+  opacity: 1;
+}
+
+.toggle-sun {
+  right: 7px;
+  opacity: 0.45;
+}
+
+[data-theme="light"] .toggle-moon {
+  opacity: 0.45;
+}
+
+[data-theme="light"] .toggle-sun {
+  opacity: 1;
+}
+
+.btn-theme-toggle:hover .toggle-track {
+  border-color: var(--lc-border, rgba(255, 255, 255, 0.35));
+  transform: scale(1.05);
+}
+
+
+
+
+[data-theme="light"] .stats-strip {
+  background: #f0f9f7;
+  border-top: 1px solid rgba(171, 209, 198, 0.45);
+  border-bottom: 1px solid rgba(171, 209, 198, 0.45);
+}
+
+[data-theme="light"] .stat-item {
+  border-color: rgba(171, 209, 198, 0.30);
+}
+
+[data-theme="light"] .stat-item strong {
+  color: #0f2e28;
+}
+
+[data-theme="light"] .stat-item span {
+  color: #2d6e63;
+}
+
+/* ── FADE IN ── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═════════════════
+   AUTH MODALS
+   ═════════════════ */
+.auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  background: rgba(15, 12, 26, .88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all .35s ease;
+  padding: 0;
+}
+
+.auth-modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.auth-modal {
+  background: var(--bg-2);
+  border: 1px solid var(--lc-border);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92svh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, .72);
+  transform: translateY(100%);
+  transition: transform .35s cubic-bezier(.34, 1.56, .64, 1);
+  position: relative;
+}
+
+.auth-modal-backdrop.open .auth-modal {
+  transform: translateY(0);
+}
+
+.auth-modal-glow {
+  height: 4px;
+  background: linear-gradient(90deg, var(--uv), var(--lc), var(--uv));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%
+  }
+
+  100% {
+    background-position: 200% 50%
+  }
+}
+
+.auth-modal-inner {
+  padding: 1.5rem 1.25rem 2rem;
+}
+
+.auth-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: .82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  z-index: 2;
+}
+
+.auth-close:hover,
+.auth-close:active {
+  background: var(--border);
+  color: var(--text);
+}
+
+.auth-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .45rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-logo-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--uv-deeper), var(--uv));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 0 0 3px var(--lc-border), 0 0 22px rgba(171, 209, 198, 0.45), 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  animation: logoPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px var(--lc-border), 0 0 18px rgba(171, 209, 198, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px var(--lc-border), 0 0 30px rgba(171, 209, 198, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.auth-logo-icon img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.auth-logo-wrap h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.auth-logo-wrap p {
+  font-size: .82rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  margin-bottom: .9rem;
+}
+
+.auth-field label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: .3px;
+}
+
+.auth-input-wrap {
+  position: relative;
+}
+
+.auth-input-icon {
+  position: absolute;
+  left: .85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: .95rem;
+  color: var(--text-dim);
+  pointer-events: none;
+  transition: color var(--transition);
+}
+
+.auth-input {
+  width: 100%;
+  padding: .78rem 1rem .78rem 2.5rem;
+  border-radius: 10px;
+  background: var(--bg-3);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: .95rem;
+  font-family: inherit;
+  transition: all var(--transition);
+  min-height: 50px;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--lc);
+  box-shadow: 0 0 0 3px rgba(254, 250, 205, .14);
+  background: var(--bg-2);
+}
+
+.auth-input-wrap:focus-within .auth-input-icon {
+  color: var(--lc);
+}
+
+.auth-input::placeholder {
+  color: var(--text-dim);
+}
+
+.auth-pw-toggle {
+  position: absolute;
+  right: .8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: .88rem;
+  cursor: pointer;
+  padding: .2rem;
+  transition: color var(--transition);
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-pw-toggle:hover {
+  color: var(--text);
+}
+
+.auth-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .65rem;
+}
+
+.auth-forgot {
+  text-align: right;
+  margin-top: -.25rem;
+  margin-bottom: .7rem;
+}
+
+.auth-forgot a {
+  font-size: .78rem;
+  color: var(--lc);
+}
+
+.auth-terms {
+  font-size: .75rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: .75rem;
+  line-height: 1.5;
+}
+
+.auth-terms a {
+  color: var(--lc);
+}
+
+.auth-submit {
+  width: 100%;
+  padding: .85rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--uv), var(--uv-light));
+  color: #0f2e28;
+  font-size: .92rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 4px 20px rgba(95, 74, 139, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  margin-top: .25rem;
+  min-height: 52px;
+}
+
+.auth-submit:hover,
+.auth-submit:active {
+  box-shadow: 0 8px 28px rgba(95, 74, 139, .6);
+}
+
+.auth-submit-loader {
+  display: none;
+}
+
+.auth-submit.loading .auth-submit-text {
+  display: none;
+}
+
+.auth-submit.loading .auth-submit-loader {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.auth-submit-loader span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lc);
+  animation: aiDot 1s ease-in-out infinite;
+}
+
+.auth-submit-loader span:nth-child(2) {
+  animation-delay: .15s;
+}
+
+.auth-submit-loader span:nth-child(3) {
+  animation-delay: .3s;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  margin: 1.1rem 0;
+  color: var(--text-dim);
+  font-size: .75rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-social {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+
+.auth-social-btn {
+  flex: 1;
+  padding: .65rem;
+  border-radius: 10px;
+  background: var(--bg-3);
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  font-size: .85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  transition: all var(--transition);
+  min-height: 48px;
+}
+
+.auth-social-btn:hover,
+.auth-social-btn:active {
+  border-color: var(--lc-border);
+  color: var(--text);
+  background: var(--bg-2);
+}
+
+.auth-social-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--border);
+}
+
+.auth-switch p {
+  font-size: .83rem;
+  color: var(--text-muted);
+}
+
+.auth-switch a {
+  color: var(--lc);
+  font-weight: 600;
+}
+
+.auth-error {
+  background: rgba(248, 113, 113, .12);
+  border: 1px solid rgba(248, 113, 113, .3);
+  color: #f87171;
+  border-radius: 8px;
+  padding: .55rem .85rem;
+  font-size: .8rem;
+  margin-bottom: .7rem;
+  display: none;
+}
+
+.auth-success {
+  background: rgba(74, 222, 128, .1);
+  border: 1px solid rgba(74, 222, 128, .25);
+  color: #4ade80;
+  border-radius: 8px;
+  padding: .55rem .85rem;
+  font-size: .8rem;
+  margin-bottom: .7rem;
+  display: none;
+  text-align: center;
+}
+
+.pw-strength-bar {
+  height: 3px;
+  border-radius: 99px;
+  background: var(--bg-3);
+  margin-top: .45rem;
+  overflow: hidden;
+}
+
+.pw-strength-fill {
+  height: 100%;
+  border-radius: 99px;
+  width: 0%;
+  transition: width .4s ease, background .4s ease;
+}
+
+.pw-strength-label {
+  font-size: .7rem;
+  margin-top: .28rem;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+/* ═══════════════════════════════════
+   TABLET 640px+
+   ═══════════════════════════════════ */
+@media (min-width:640px) {
+  .hero-greeting {
+    display: block;
+  }
+
+  .hero-content {
+    align-items: flex-start;
+    text-align: left;
+    justify-content: flex-end;
+    padding-bottom: 3.5rem;
+  }
+
+  .hero-cta {
+    flex-direction: row;
+    max-width: none;
+  }
+
+  .btn-primary,
+  .btn-ghost {
+    width: auto;
+  }
+
+  .stats-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stat-item {
+    padding: .6rem 2.5rem;
+    border: none;
+  }
+
+  .stat-item strong {
+    font-size: 2rem;
+  }
+
+  .stat-divider {
+    display: block;
+    width: 1px;
+    height: 36px;
+    background: var(--border);
+  }
+
+  .places-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .results-cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .india-map-container {
+    height: 340px;
+  }
+
+  .about-img-grid img {
+    height: 150px;
+  }
+
+  .auth-modal-backdrop {
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .auth-modal {
+    border-radius: 20px;
+    max-height: 90svh;
+    transform: scale(.92) translateY(30px);
+    max-width: 440px;
+  }
+
+  .auth-modal-backdrop.open .auth-modal {
+    transform: scale(1) translateY(0);
+  }
+
+  .auth-modal-inner {
+    padding: 2rem 2rem 1.75rem;
+  }
+
+  .auth-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .auth-social {
+    flex-direction: row;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-cols-wrap {
+    display: contents;
+  }
+
+  .scroll-indicator {
+    display: flex;
+    position: absolute;
+    bottom: 1.75rem;
+    left: 1.5rem;
+    z-index: 2;
+    align-items: center;
+    gap: .7rem;
+    color: rgba(255, 255, 255, .5);
+    font-size: .72rem;
+    letter-spacing: 2px;
+  }
+
+  .scroll-line {
+    width: 46px;
+    height: 1px;
+    background: rgba(255, 255, 255, .28);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scroll-dot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 100%;
+    background: var(--lc);
+    animation: scrollMove 2s ease-in-out infinite;
+  }
+}
+
+@keyframes scrollMove {
+  0% {
+    left: -18px
+  }
+
+  100% {
+    left: 100%
+  }
+}
+
+/* ═══════════════════════════════════
+   DESKTOP 900px+
+   ═══════════════════════════════════ */
+@media (min-width:900px) {
+  #navbar {
+    padding: calc(1rem + var(--safe-top)) 0 1rem;
+  }
+
+  #navbar.scrolled {
+    padding: calc(.65rem + var(--safe-top)) 0 .65rem;
+  }
+
+  .nav-container {
+    padding: 0 1.5rem;
+  }
+
+  .nav-logo {
+    font-size: 1.2rem;
+  }
+
+  .nav-logo img.logo-img {
+    width: 42px;
+    height: 42px;
+  }
+
+  .nav-links {
+    display: flex;
+  }
+
+  .nav-actions {
+    display: flex;
+  }
+
+  .nav-actions .btn-nav-login,
+  .nav-actions .btn-nav-signup {
+    display: flex;
+  }
+
+  .hamburger {
+    display: none;
+  }
+
+  .nav-mobile-overlay {
+    display: none !important;
+  }
+
+  .hero-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    justify-content: center;
+    min-height: 100svh;
+  }
+
+  .hero-cta {
+    max-width: none;
+  }
+
+  .section,
+  .map-outer-section,
+  .planner-outer-section {
+    padding: 5.5rem 0;
+  }
+
+  .section-header-wrap {
+    margin-bottom: 3rem;
+    padding: 0 1.5rem;
+  }
+
+  .india-map-layout {
+    flex-direction: row;
+    height: 500px;
+    gap: 1.25rem;
+    padding: 0 1.5rem;
+  }
+
+  .india-map-container {
+    flex: 1;
+    height: 100%;
+  }
+
+  .india-map-panel {
+    width: 340px;
+    flex-shrink: 0;
+  }
+
+  .places-grid {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 1.5rem;
+    gap: 1rem;
+  }
+
+  .place-img-wrap {
+    height: 230px;
+  }
+
+  .place-hover-cta {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all .3s ease;
+  }
+
+  .place-card:hover .place-hover-cta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .about-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    padding: 0 1.5rem;
+  }
+
+  .about-text {
+    max-width: 520px;
+  }
+
+  .about-img-grid img {
+    height: 190px;
+  }
+
+  .contact-inner {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 3rem;
+    padding: 4rem 1.5rem 3rem;
+  }
+
+  .footer-cols-wrap {
+    display: contents;
+  }
+
+  .results-cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .chatbot-btn {
+    width: auto;
+    height: auto;
+    border-radius: 99px;
+    padding: .7rem 1.2rem;
+  }
+
+  .chatbot-btn>span:not(.chatbot-icon):not(.chat-notif) {
+    display: inline;
+  }
+
+  .chatbot-window {
+    width: 360px;
+  }
+
+  .chatbot-container {
+    right: calc(1.25rem + var(--safe-right));
+    bottom: calc(1.5rem + var(--safe-bottom));
+  }
+
+  .city-hero {
+    height: 56vh;
+    min-height: 320px;
+  }
+
+  .city-hero-content {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .city-tabs-wrap {
+    padding: 2rem 1.5rem;
+  }
+
+  .city-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+
+  .auth-modal-inner {
+    padding: 2.5rem 2.5rem 2rem;
+  }
+}
+
+/* ═══════════════════════════════════
+   EXTRA SMALL 380px
+   ═══════════════════════════════════ */
+@media (max-width:380px) {
+  .hero-headline {
+    font-size: clamp(2.4rem, 15vw, 3.2rem);
+  }
+
+  .city-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-cols-wrap {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ══════════════════════════════════════
+   ABOUT — IMPROVED LAYOUT
+   ══════════════════════════════════════ */
+.about-section .section-header-wrap {
+  text-align: center;
+  padding-bottom: 0;
+}
+
+.about-desc {
+  color: var(--text-muted);
+  line-height: 1.85;
+  margin-bottom: .9rem;
+  font-size: .9rem;
+}
+
+.about-stats-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.about-stat {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.about-stat strong {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--lc);
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: .05em;
+}
+
+.about-stat span {
+  font-size: .73rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+/* ══════════════════════════════════════
+   CONTACT — IMPROVED LAYOUT
+   ══════════════════════════════════════ */
+.contact-inner {
+  grid-template-columns: 1fr;
+  max-width: 860px;
+}
+
+.contact-info-top {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: .5rem;
+  padding: 1.5rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.contact-info-top .contact-item {
+  flex: 1;
+  min-width: 180px;
+  max-width: 260px;
+}
+
+.contact-info-top .contact-icon {
+  width: 42px;
+  height: 42px;
+  font-size: 1rem;
+  border-radius: 10px;
+}
+
+.contact-info-top .contact-item strong {
+  font-size: .85rem;
+}
+
+.contact-info-top .contact-item p,
+.contact-info-top .contact-item a {
+  color: var(--text-muted);
+  font-size: .83rem;
+  text-decoration: none;
+}
+
+.contact-info-top .contact-item a:hover {
+  color: var(--lc);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .85rem;
+}
+
+/* ══════════════════════════════════════
+   TRIP PLANNER — FOOD STEP
+   ══════════════════════════════════════ */
+.wiz-food-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.wiz-food-card {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  text-align: center;
+  position: relative;
+  transition: all .25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+}
+
+.wiz-food-card:hover {
+  border-color: var(--lc);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+}
+
+.wiz-food-card.selected {
+  border-color: var(--lc);
+  background: var(--lc-dim);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
+}
+
+.wiz-food-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.wiz-food-title {
+  font-weight: 700;
+  font-size: .92rem;
+  color: var(--text);
+}
+
+.wiz-food-desc {
+  font-size: .75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.wiz-food-check {
+  position: absolute;
+  top: .65rem;
+  right: .75rem;
+  width: 22px;
+  height: 22px;
+  background: var(--lc);
+  color: #000;
+  border-radius: 50%;
+  font-size: .7rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .2s;
+}
+
+.wiz-food-card.selected .wiz-food-check {
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .about-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .about-stats-row {
+    flex-wrap: wrap;
+  }
+
+  .wiz-food-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-info-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ══════════════════════════════════════
+   PLANNER PARALLAX — EXTRA POLISH
+   ══════════════════════════════════════ */
+
+/* Animated shimmer lines across the bg */
+.planner-parallax-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 80px,
+      rgba(171, 209, 198, 0.025) 80px,
+      rgba(171, 209, 198, 0.025) 81px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Floating glow orbs */
+.planner-outer-section {
+  position: relative;
+  padding: 0 0 6rem;
+  background-image: url('in13.jpeg');
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  isolation: isolate;
+}
+
+.planner-outer-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+      rgba(4, 12, 28, 0.60) 0%,
+      rgba(4, 12, 28, 0.42) 25%,
+      rgba(4, 12, 28, 0.42) 75%,
+      rgba(4, 12, 28, 0.72) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.planner-photo-banner,
+.wizard-card,
+.planner-section-fade-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+/* Wizard card content should be white text in dark context */
+.wizard-card .wiz-question {
+  color: #f0f4f8;
+}
+
+.wizard-card .wiz-hint {
+  color: rgba(200, 220, 215, 0.7);
+}
+
+.wizard-card .wiz-chips-label {
+  color: rgba(200, 220, 215, 0.6);
+}
+
+/* Bottom padding for wizard card so it floats above section end */
+.wizard-card {
+  margin-bottom: 0;
+}
+
+/* Wizard step count */
+.wiz-step-count {
+  color: rgba(200, 220, 215, 0.6);
+}
+
+/* Ensure result panel has right bg in parallax context */
+.wiz-result-panel {
+  background: rgba(5, 15, 28, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(171, 209, 198, 0.15);
+}
+
+/* Bottom fade on section */
+.planner-outer-section {
+  position: relative;
+  padding: 0 0 6rem;
+  background-image: url('in13.jpeg');
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  isolation: isolate;
+}
+
+.planner-outer-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+      rgba(4, 12, 28, 0.60) 0%,
+      rgba(4, 12, 28, 0.42) 25%,
+      rgba(4, 12, 28, 0.42) 75%,
+      rgba(4, 12, 28, 0.72) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.planner-photo-banner,
+.wizard-card,
+.planner-section-fade-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════
+   WIZARD CARD — TEXT READABILITY ON DARK PARALLAX BG
+   ══════════════════════════════════════ */
+.wizard-card .wiz-question,
+.wizard-card .wiz-panel>*:first-child {
+  color: #edf2f7 !important;
+}
+
+.wizard-card .wiz-hint {
+  color: rgba(190, 215, 210, 0.75) !important;
+}
+
+.wizard-card .wiz-chips-label {
+  color: rgba(190, 215, 210, 0.65) !important;
+}
+
+.wizard-card .wiz-step-label {
+  color: rgba(190, 215, 210, 0.6);
+}
+
+.wizard-card .wiz-step-count {
+  color: rgba(190, 215, 210, 0.55);
+}
+
+/* Input fields inside dark card */
+.wizard-card .wiz-search-input,
+.wizard-card .wiz-date-field input {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(171, 209, 198, 0.25);
+  color: #edf2f7;
+}
+
+.wizard-card .wiz-search-input::placeholder {
+  color: rgba(190, 215, 210, 0.45);
+}
+
+.wizard-card .wiz-search-input:focus,
+.wizard-card .wiz-date-field input:focus {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(171, 209, 198, 0.6);
+}
+
+/* Date labels */
+.wizard-card .wiz-date-field label {
+  color: rgba(190, 215, 210, 0.7);
+}
+
+/* Duration badge */
+.wizard-card .wiz-duration-badge {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(171, 209, 198, 0.2);
+  color: rgba(190, 215, 210, 0.8);
+}
+
+/* Traveler rows */
+.wizard-card .wiz-traveler-row {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(171, 209, 198, 0.15);
+}
+
+.wizard-card .wiz-traveler-info h4 {
+  color: #edf2f7;
+}
+
+.wizard-card .wiz-traveler-info p {
+  color: rgba(190, 215, 210, 0.6);
+}
+
+/* Budget cards on dark bg */
+.wizard-card .wiz-budget-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(171, 209, 198, 0.18);
+}
+
+.wizard-card .wiz-budget-card:hover,
+.wizard-card .wiz-budget-card.selected {
+  background: rgba(171, 209, 198, 0.12);
+  border-color: var(--lc);
+}
+
+.wizard-card .wiz-b-title {
+  color: #edf2f7;
+}
+
+.wizard-card .wiz-b-range {
+  color: rgba(190, 215, 210, 0.65);
+}
+
+/* Summary items */
+.wizard-card .wiz-summary-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(171, 209, 198, 0.15);
+}
+
+.wizard-card .wiz-s-label {
+  color: rgba(190, 215, 210, 0.6);
+}
+
+.wizard-card .wiz-s-value {
+  color: #edf2f7;
+}
+
+/* Location button */
+.wizard-card .wiz-loc-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(171, 209, 198, 0.2);
+  color: rgba(190, 215, 210, 0.8);
+}
+
+.wizard-card .wiz-loc-btn:hover {
+  background: rgba(171, 209, 198, 0.12);
+  border-color: var(--lc);
+  color: var(--lc);
+}
+
+/* Chips */
+.wizard-card .wiz-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(171, 209, 198, 0.18);
+  color: rgba(190, 215, 210, 0.85);
+}
+
+.wizard-card .wiz-chip:hover,
+.wizard-card .wiz-chip.selected {
+  background: rgba(171, 209, 198, 0.15);
+  border-color: var(--lc);
+  color: var(--lc);
+}
+
+/* Food cards */
+.wizard-card .wiz-food-card {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(171, 209, 198, 0.18);
+}
+
+.wizard-card .wiz-food-card:hover,
+.wizard-card .wiz-food-card.selected {
+  background: rgba(171, 209, 198, 0.12);
+  border-color: var(--lc);
+}
+
+.wizard-card .wiz-food-title {
+  color: #edf2f7;
+}
+
+.wizard-card .wiz-food-desc {
+  color: rgba(190, 215, 210, 0.65);
+}
+
+/* Step circle border on dark bg */
+.wizard-card .wiz-step-circle {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(171, 209, 198, 0.2);
+  color: rgba(190, 215, 210, 0.6);
+}
+
+/* Back/Next button area */
+.wizard-card .wiz-footer {
+  background: rgba(0, 0, 0, 0.2);
+  border-top-color: rgba(171, 209, 198, 0.12);
+}
+
+.city-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+/* ════════════════════════════════════════════════════════
+   ROAMY-STYLE AI PLANNER — Spot-by-Spot Itinerary View
+   ════════════════════════════════════════════════════════ */
+
+/* Overview blurb */
+.rp-overview {
+  font-size: .9rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  padding: .85rem 1.1rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: .1rem;
+}
+
+/* AI badge inside card header */
+.rp-ai-badge {
+  margin-left: auto;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--lc);
+  background: rgba(58,140,126,.12);
+  border: 1px solid rgba(58,140,126,.25);
+  border-radius: 20px;
+  padding: .18rem .65rem;
+}
+
+/* ── DAY TABS ─────────────────────────────────────────── */
+.rp-tabs-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+}
+.rp-tabs-wrap::-webkit-scrollbar { display: none; }
+
+.rp-day-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0;
+  min-width: max-content;
+}
+
+.rp-day-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: .75rem 1.1rem;
+  min-width: 80px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: background .15s, border-color .15s;
+  gap: .2rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rp-day-tab:hover {
+  background: var(--bg-2);
+}
+
+.rp-day-tab.active {
+  border-bottom-color: var(--lc);
+  background: rgba(58,140,126,.07);
+}
+
+.rp-tab-num {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+}
+
+.rp-day-tab.active .rp-tab-num {
+  color: var(--lc);
+}
+
+.rp-tab-title {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── DAY PANELS ───────────────────────────────────────── */
+.rp-days-container { position: relative; }
+
+.rp-day-panel { display: none; padding: 0; }
+.rp-day-panel.active { display: block; }
+
+.rp-day-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .85rem 1.1rem;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.rp-day-badge {
+  font-size: .65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: .25rem .75rem;
+  border-radius: 20px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rp-day-title-full {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+
+.rp-day-spot-count {
+  font-size: .65rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .18rem .6rem;
+}
+
+/* ── SPOTS LIST ───────────────────────────────────────── */
+.rp-spots-list {
+  padding: .75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.rp-spot-item {
+  display: flex;
+  gap: .85rem;
+  align-items: flex-start;
+  padding: .85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rp-spot-item:last-child {
+  border-bottom: none;
+  padding-bottom: .25rem;
+}
+
+.rp-spot-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--lc);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rp-spot-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rp-spot-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .5rem;
+  margin-bottom: .35rem;
+}
+
+.rp-spot-info { flex: 1; min-width: 0; }
+
+.rp-spot-name {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: .3rem;
+}
+
+.rp-spot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  align-items: center;
+}
+
+.rp-spot-cat {
+  font-size: .6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: .18rem .55rem;
+  border-radius: 20px;
+}
+
+.rp-spot-time, .rp-spot-dur {
+  font-size: .68rem;
+  color: var(--text-muted);
+}
+
+.rp-spot-fee {
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--lc);
+  background: rgba(58,140,126,.1);
+  border: 1px solid rgba(58,140,126,.2);
+  border-radius: 8px;
+  padding: .2rem .55rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rp-spot-desc {
+  font-size: .82rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0 0 .45rem;
+}
+
+.rp-spot-tip {
+  font-size: .75rem;
+  color: #f59e0b;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.18);
+  border-radius: 8px;
+  padding: .3rem .65rem;
+  line-height: 1.45;
+}
+
+/* ── TRAVEL CONNECTOR between spots ─────────────────── */
+.rp-travel-connector {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-top: .55rem;
+  padding-left: .1rem;
+}
+
+.rp-travel-line {
+  width: 20px;
+  height: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.rp-travel-badge {
+  font-size: .68rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .2rem .65rem;
+  white-space: nowrap;
+}
+
+/* ── TIPS CARD ────────────────────────────────────────── */
+.rp-tips-card .plan-card-header { margin-bottom: 0; }
+
+.rp-tips-list {
+  padding: .75rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.rp-tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  font-size: .84rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.rp-tip-dot {
+  color: var(--lc);
+  font-size: .75rem;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* ── HOTEL RATING ─────────────────────────────────────── */
+.rp-hotel-rating {
+  font-size: .78rem;
+  color: #f59e0b;
+  margin: .2rem 0 .15rem;
+}
+.rp-hotel-rating span {
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-left: .25rem;
+}
+
+/* ── INFO BODY (best time, etc.) ──────────────────────── */
+.rp-info-body {
+  padding: .85rem 1.1rem;
+  font-size: .84rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── EMERGENCY NUMBERS ────────────────────────────────── */
+.rp-emergency-list {
+  padding: .6rem 1.1rem .85rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.rp-em-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .82rem;
+  padding: .45rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.rp-em-item:last-child { border-bottom: none; }
+.rp-em-item span { color: var(--text-muted); }
+.rp-em-item strong { font-weight: 700; color: var(--text); }
+
+/* ── LIGHT THEME OVERRIDES ────────────────────────────── */
+[data-theme="light"] .rp-overview {
+  background: #f0faf8;
+  border-color: #c8e8e3;
+  color: #3a6058;
+}
+
+[data-theme="light"] .rp-day-tab.active {
+  background: rgba(58,140,126,.06);
+}
+
+[data-theme="light"] .rp-spot-fee {
+  background: rgba(58,140,126,.08);
+}
+
+[data-theme="light"] .rp-travel-badge {
+  background: #f5f5f5;
+}
+
+[data-theme="light"] .rp-tip-item {
+  color: #1a3530;
+}
+
+/* ── MOBILE OVERRIDES ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .rp-day-tab {
+    min-width: 72px;
+    padding: .65rem .85rem;
+  }
+  .rp-tab-title {
+    font-size: .62rem;
+    max-width: 80px;
+  }
+  .rp-spot-name { font-size: .9rem; }
+  .rp-spot-desc { font-size: .78rem; }
+  .rp-spot-num { width: 24px; height: 24px; font-size: .65rem; }
+  .rp-spot-item { gap: .65rem; padding: .75rem 0; }
+  .rp-spots-list { padding: .5rem .85rem; }
+  .rp-day-header { padding: .75rem .85rem; gap: .55rem; }
+  .rp-day-title-full { font-size: .82rem; }
+  .rp-spot-fee { font-size: .68rem; }
+}
+
+/* ════════════════════════════════════════════════════════
+   RICH TRANSPORT & HOTEL CARDS — v2
+   ════════════════════════════════════════════════════════ */
+
+/* ── TRANSPORT CARD ─────────────────────────────────────── */
+.rp-transport-summary {
+  font-size: .85rem;
+  color: var(--text-muted);
+  padding: .75rem 1.1rem .5rem;
+  line-height: 1.55;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Mode tabs (Train / Bus / Flight) */
+.rp-transport-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.rp-transport-tabs::-webkit-scrollbar { display: none; }
+
+.rp-trans-tab {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .75rem 1.1rem;
+  min-width: 90px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all .15s;
+  white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.rp-trans-tab:hover { background: var(--bg-2); }
+.rp-trans-tab.active {
+  color: var(--tab-color, var(--lc));
+  border-bottom-color: var(--tab-color, var(--lc));
+  background: color-mix(in srgb, var(--tab-color, var(--lc)) 8%, transparent);
+}
+.rp-trans-tab-icon { font-size: 1.1rem; }
+.rp-trans-tab-label { font-size: .78rem; }
+
+/* Route panels */
+.rp-trans-panel { display: none; padding: .85rem 1rem; display: none; flex-direction: column; gap: .75rem; }
+.rp-trans-panel.active { display: flex; }
+
+/* Individual route card */
+.rp-route-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-left: 4px solid #3b82f6;
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+
+.rp-route-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .5rem;
+}
+.rp-route-name {
+  font-size: .92rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.rp-route-num {
+  font-size: .72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.rp-route-fare {
+  font-size: .8rem;
+  font-weight: 800;
+  color: var(--lc);
+  background: rgba(58,140,126,.1);
+  border: 1px solid rgba(58,140,126,.2);
+  border-radius: 8px;
+  padding: .25rem .65rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Journey from → to */
+.rp-route-journey {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 0;
+}
+.rp-route-from, .rp-route-to {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+  flex: 1;
+}
+.rp-route-to { justify-content: flex-end; text-align: right; }
+.rp-route-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.rp-route-dot--from { background: var(--text-muted); border: 2px solid var(--border); }
+.rp-route-dot--to { background: #3b82f6; }
+.rp-route-station-label { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: .15rem; }
+.rp-route-station { font-size: .8rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+.rp-route-line {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  position: relative;
+}
+.rp-route-line::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.rp-route-duration {
+  font-size: .68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .18rem .65rem;
+  z-index: 1;
+  position: relative;
+  white-space: nowrap;
+}
+
+/* Meta chips (departs, frequency) */
+.rp-route-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.rp-route-chip {
+  font-size: .68rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .2rem .65rem;
+}
+
+.rp-route-tip {
+  font-size: .74rem;
+  color: #f59e0b;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.18);
+  border-radius: 8px;
+  padding: .35rem .7rem;
+  line-height: 1.45;
+}
+
+/* Local transport grid */
+.rp-local-transport {
+  border-top: 1px solid var(--border);
+  padding: .85rem 1rem;
+}
+.rp-local-header {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+  margin-bottom: .65rem;
+}
+.rp-local-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .6rem;
+}
+.rp-local-item {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .75rem .6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  text-align: center;
+}
+.rp-local-icon { font-size: 1.5rem; }
+.rp-local-mode { font-size: .72rem; font-weight: 700; color: var(--text); }
+.rp-local-cost { font-size: .68rem; color: var(--lc); font-weight: 700; }
+.rp-local-tip { font-size: .6rem; color: var(--text-muted); line-height: 1.4; margin-top: .1rem; }
+
+/* ── HOTEL CARDS ─────────────────────────────────────────── */
+.rp-hotels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: .85rem;
+  padding: 1rem;
+}
+
+.rp-hotel-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  transition: box-shadow .2s, transform .2s;
+}
+.rp-hotel-card:hover {
+  box-shadow: 0 6px 28px rgba(0,0,0,.18);
+  transform: translateY(-2px);
+}
+
+.rp-hotel-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rp-hotel-type-badge {
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: .2rem .7rem;
+  border-radius: 20px;
+  border: 1px solid;
+}
+.rp-hotel-stars { font-size: .85rem; letter-spacing: -.5px; color: #f59e0b; }
+.rp-hotel-stars-empty { color: var(--border); }
+
+.rp-hotel-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.rp-hotel-location {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-start;
+  font-size: .8rem;
+  color: var(--text-muted);
+}
+.rp-hotel-area-text { font-weight: 600; color: var(--text); font-size: .82rem; }
+.rp-hotel-address { font-size: .74rem; opacity: .75; margin-top: .1rem; line-height: 1.4; }
+.rp-hotel-dist { font-size: .7rem; color: var(--lc); margin-top: .2rem; font-weight: 600; }
+
+/* Rating bar */
+.rp-hotel-rating-row {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+.rp-hotel-score {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--lc);
+  flex-shrink: 0;
+}
+.rp-hotel-score-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.rp-hotel-score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--lc), #5ec4b4);
+  border-radius: 3px;
+  transition: width .6s ease;
+}
+.rp-hotel-score-label { font-size: .62rem; color: var(--text-muted); flex-shrink: 0; }
+
+/* Amenities chips */
+.rp-hotel-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+.rp-amenity-chip {
+  font-size: .65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .2rem .6rem;
+}
+
+/* Price row */
+.rp-hotel-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .75rem .9rem;
+  margin-top: .1rem;
+}
+.rp-hotel-price-main {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.rp-hotel-price-main span { font-size: .72rem; font-weight: 500; color: var(--text-muted); margin-left: .2rem; }
+.rp-hotel-price-range { font-size: .68rem; color: var(--text-muted); margin-top: .15rem; }
+.rp-hotel-book-via {
+  font-size: .65rem;
+  color: var(--text-muted);
+  text-align: right;
+  line-height: 1.5;
+}
+.rp-hotel-book-via strong { color: var(--lc); font-size: .72rem; }
+
+.rp-hotel-why {
+  font-size: .78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: flex;
+  gap: .4rem;
+  align-items: flex-start;
+  padding-top: .35rem;
+  border-top: 1px solid var(--border);
+}
+.rp-hotel-why span { color: var(--lc); flex-shrink: 0; margin-top: 2px; }
+
+/* ── LIGHT THEME ─────────────────────────────────────────── */
+[data-theme="light"] .rp-route-card { background: #f8fffe; }
+[data-theme="light"] .rp-hotel-card { background: #f8fffe; }
+[data-theme="light"] .rp-local-item { background: #f0faf8; }
+[data-theme="light"] .rp-hotel-price-row { background: #f0faf8; }
+
+/* ── MOBILE ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .rp-transport-tabs { padding: 0; }
+  .rp-trans-tab { min-width: 80px; padding: .65rem .85rem; }
+  .rp-trans-panel { padding: .65rem .75rem; gap: .6rem; }
+  .rp-route-card { padding: .85rem .75rem; gap: .55rem; }
+  .rp-route-name { font-size: .86rem; }
+  .rp-route-station { font-size: .74rem; }
+  .rp-route-station-label { font-size: .56rem; }
+  .rp-route-duration { font-size: .62rem; padding: .15rem .5rem; }
+  .rp-local-grid { grid-template-columns: repeat(3, 1fr); gap: .45rem; }
+  .rp-local-item { padding: .6rem .4rem; }
+  .rp-local-mode { font-size: .65rem; }
+  .rp-local-cost { font-size: .62rem; }
+  .rp-local-tip { display: none; }
+
+  .rp-hotels-grid {
+    grid-template-columns: 1fr;
+    padding: .75rem;
+    gap: .75rem;
+  }
+  .rp-hotel-card { padding: .9rem; gap: .55rem; }
+  .rp-hotel-name { font-size: .95rem; }
+  .rp-hotel-score { font-size: 1rem; }
+  .rp-hotel-price-main { font-size: 1rem; }
+  .rp-transport-summary { font-size: .8rem; padding: .65rem .85rem .4rem; }
 }
