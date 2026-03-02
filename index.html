@@ -1268,6 +1268,60 @@
         font-size: 0.52rem !important;
       }
     }
+
+      /* ── SUMMARY EDIT BUTTONS ─────────────────────────── */
+      .wiz-s-top {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        margin-bottom: .35rem;
+      }
+      .wiz-s-top .wiz-s-icon { font-size: 1.1rem; flex-shrink: 0; }
+      .wiz-s-top .wiz-s-label {
+        font-size: .65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--text-muted, #7fb8ac);
+        flex: 1;
+      }
+      .wiz-edit-btn {
+        font-size: .62rem;
+        font-weight: 700;
+        color: var(--lc, #3a8c7e);
+        background: rgba(58,140,126,.1);
+        border: 1px solid rgba(58,140,126,.25);
+        border-radius: 20px;
+        padding: .2rem .65rem;
+        cursor: pointer;
+        transition: background .15s, transform .1s;
+        white-space: nowrap;
+        flex-shrink: 0;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .wiz-edit-btn:hover {
+        background: rgba(58,140,126,.2);
+        transform: scale(1.04);
+      }
+      .wiz-edit-btn:active { transform: scale(.96); }
+
+      /* light theme */
+      [data-theme="light"] .wiz-edit-btn {
+        color: #2a7068;
+        background: rgba(58,140,126,.08);
+        border-color: rgba(58,140,126,.3);
+      }
+
+      /* Pulse animation on the card that was just edited */
+      @keyframes sumEditPulse {
+        0%   { box-shadow: 0 0 0 0 rgba(58,140,126,.5); }
+        70%  { box-shadow: 0 0 0 8px rgba(58,140,126,0); }
+        100% { box-shadow: 0 0 0 0 rgba(58,140,126,0); }
+      }
+      .wiz-summary-item.just-edited {
+        animation: sumEditPulse .6s ease-out;
+      }
   </style>
 </head>
 
@@ -1847,33 +1901,51 @@
 
           <div class="wiz-summary-grid">
             <div class="wiz-summary-item">
-              <div class="wiz-s-icon">📍</div>
-              <div class="wiz-s-label">Destination</div>
+              <div class="wiz-s-top">
+                <div class="wiz-s-icon">📍</div>
+                <div class="wiz-s-label">Destination</div>
+                <button class="wiz-edit-btn" onclick="wizJumpToStep(1)" title="Edit Destination">✏️ Edit</button>
+              </div>
               <div class="wiz-s-value" id="wizSumDest">—</div>
             </div>
             <div class="wiz-summary-item">
-              <div class="wiz-s-icon">📅</div>
-              <div class="wiz-s-label">Duration</div>
+              <div class="wiz-s-top">
+                <div class="wiz-s-icon">📅</div>
+                <div class="wiz-s-label">Duration</div>
+                <button class="wiz-edit-btn" onclick="wizJumpToStep(2)" title="Edit Dates">✏️ Edit</button>
+              </div>
               <div class="wiz-s-value" id="wizSumDuration">—</div>
             </div>
             <div class="wiz-summary-item">
-              <div class="wiz-s-icon">👥</div>
-              <div class="wiz-s-label">Travelers</div>
+              <div class="wiz-s-top">
+                <div class="wiz-s-icon">👥</div>
+                <div class="wiz-s-label">Travelers</div>
+                <button class="wiz-edit-btn" onclick="wizJumpToStep(3)" title="Edit Travelers">✏️ Edit</button>
+              </div>
               <div class="wiz-s-value" id="wizSumTravelers">—</div>
             </div>
             <div class="wiz-summary-item">
-              <div class="wiz-s-icon">💰</div>
-              <div class="wiz-s-label">Budget</div>
+              <div class="wiz-s-top">
+                <div class="wiz-s-icon">💰</div>
+                <div class="wiz-s-label">Budget</div>
+                <button class="wiz-edit-btn" onclick="wizJumpToStep(4)" title="Edit Budget">✏️ Edit</button>
+              </div>
               <div class="wiz-s-value" id="wizSumBudget">—</div>
             </div>
             <div class="wiz-summary-item" style="grid-column:1/-1">
-              <div class="wiz-s-icon">🧭</div>
-              <div class="wiz-s-label">Travel Style</div>
+              <div class="wiz-s-top">
+                <div class="wiz-s-icon">🧭</div>
+                <div class="wiz-s-label">Travel Style</div>
+                <button class="wiz-edit-btn" onclick="wizJumpToStep(3)" title="Edit Style">✏️ Edit</button>
+              </div>
               <div class="wiz-s-value" id="wizSumStyle" style="font-size:.82rem;font-weight:400">—</div>
             </div>
             <div class="wiz-summary-item" style="grid-column:1/-1">
-              <div class="wiz-s-icon">🍽️</div>
-              <div class="wiz-s-label">Food Preference</div>
+              <div class="wiz-s-top">
+                <div class="wiz-s-icon">🍽️</div>
+                <div class="wiz-s-label">Food Preference</div>
+                <button class="wiz-edit-btn" onclick="wizJumpToStep(5)" title="Edit Food">✏️ Edit</button>
+              </div>
               <div class="wiz-s-value" id="wizSumFood" style="font-size:.82rem;font-weight:400">—</div>
             </div>
           </div>
