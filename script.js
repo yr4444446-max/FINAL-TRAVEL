@@ -492,6 +492,39 @@ function wizPrevStep() {
     document.getElementById('wizNextBtnText').textContent = 'Continue';
 }
 
+// Jump directly to any step from the Review summary edit buttons
+function wizJumpToStep(targetStep) {
+    if (targetStep === wizCurrentStep) return;
+
+    // Hide current panel + deactivate step bar item
+    document.getElementById('wizPanel' + wizCurrentStep).classList.remove('active');
+    const curItem = document.getElementById('wizStep' + wizCurrentStep);
+    if (curItem) { curItem.classList.remove('active'); curItem.classList.remove('completed'); }
+
+    // Restore all steps between target and current back to completed state
+    for (let s = 1; s < WIZ_TOTAL; s++) {
+        const si = document.getElementById('wizStep' + s);
+        if (!si) continue;
+        si.classList.remove('active', 'completed');
+        if (s < targetStep) {
+            si.classList.add('completed');
+            si.querySelector('.wiz-step-circle').innerHTML = '✓';
+        } else if (s === targetStep) {
+            si.classList.add('active');
+            si.querySelector('.wiz-step-circle').innerHTML = s;
+        } else {
+            si.querySelector('.wiz-step-circle').innerHTML = s;
+        }
+    }
+
+    wizCurrentStep = targetStep;
+    document.getElementById('wizPanel' + wizCurrentStep).classList.add('active');
+    document.getElementById('wizBackBtn').disabled = (wizCurrentStep === 1);
+    document.getElementById('wizStepCount').textContent = `Step ${wizCurrentStep} of ${WIZ_TOTAL}`;
+    document.getElementById('wizNextBtnText').textContent = wizCurrentStep === WIZ_TOTAL ? 'Generate Plan ✦' : 'Continue';
+    document.getElementById('wizardCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function wizValidate(step) {
     if (step === 1) {
         const dest = document.getElementById('wizDestInput')?.value?.trim() || '';
