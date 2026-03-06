@@ -700,11 +700,6 @@ function wizPopulateSummary() {
 }
 
 async function wizGeneratePlan() {
-    const btn = document.getElementById('wizNextBtn');
-    btn.disabled = true;
-    btn.innerHTML = `<span style="font-size:.8rem">🗺️ Finding best spots…</span>`;
-    document.getElementById('wizBackBtn').disabled = true;
-
     const dest = wizState.destination;
     const from = wizState.from;
     const dur = wizState.duration || 5;
@@ -712,29 +707,84 @@ async function wizGeneratePlan() {
     const style = wizState.styles.join(', ') || 'cultural';
     const foodPref = wizState.food === 'veg' ? 'Vegetarian only' : 'Both veg and non-veg';
     const dietExtra = wizState.diet && wizState.diet.length ? `, special needs: ${wizState.diet.join(', ')}` : '';
-    const fromLine = from ? `Traveling from: ${from}. ` : '';
     const budgetPerPerson = wizState.customBudget || { budget: 10000, normal: 27000, luxury: 60000 }[wizState.budget] || 27000;
     const budgetLabel = wizState.customBudget
         ? `Custom ₹${wizState.customBudget.toLocaleString('en-IN')} per person`
         : { budget: 'Budget (₹5k–₹15k)', normal: 'Mid-Range (₹15k–₹40k)', luxury: 'Luxury (₹40k+)' }[wizState.budget];
-
     const cityKey = Object.keys(CITY_DATA).find(k => dest.toLowerCase().includes(k));
     const cityData = cityKey ? CITY_DATA[cityKey] : null;
 
-    // ── Animated loading stages so it feels fast ──
-    const loadingStages = [
-        '🗺️ Finding best spots…',
-        '🏨 Picking top hotels…',
-        '🚆 Checking trains & buses…',
-        '🍽️ Adding food stops…',
-        '✦ Finishing your plan…'
-    ];
-    let stageIdx = 0;
-    const loadBtn = document.getElementById('wizNextBtn');
-    const stageInterval = setInterval(() => {
-        stageIdx = (stageIdx + 1) % loadingStages.length;
-        if (loadBtn) loadBtn.innerHTML = `<span style="font-size:.8rem">${loadingStages[stageIdx]}</span>`;
-    }, 1800);
+    // ── Hide wizard steps, show AI loading panel inside the card ──
+    document.querySelectorAll('.wiz-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('wizStepBar').style.display = 'none';
+    document.getElementById('wizFooter').style.display = 'none';
+
+    let aiLoadEl = document.getElementById('wizAILoadPanel');
+    if (!aiLoadEl) {
+        aiLoadEl = document.createElement('div');
+        aiLoadEl.id = 'wizAILoadPanel';
+        document.getElementById('wizardCard').appendChild(aiLoadEl);
+    }
+    aiLoadEl.style.display = 'block';
+    aiLoadEl.innerHTML = `
+      <div class="wiz-ai-load-wrap">
+        <div class="wiz-ai-load-top">
+          <div class="wiz-ai-orb">
+            <div class="wiz-ai-orb-ring"></div>
+            <div class="wiz-ai-orb-ring wiz-ai-orb-ring2"></div>
+            <span class="wiz-ai-orb-icon">✦</span>
+          </div>
+          <div class="wiz-ai-load-text">
+            <h3>Crafting Your Perfect Plan…</h3>
+            <p>AI is building a personalised <strong>${dur}-day itinerary</strong> for <strong>${dest}</strong></p>
+          </div>
+        </div>
+        <div class="wiz-ai-stages">
+          <div class="wiz-ai-stage"         id="wizAIStage0"><span class="wiz-ai-stage-dot anim"></span><span>🗺️ Mapping best spots &amp; attractions</span></div>
+          <div class="wiz-ai-stage pending" id="wizAIStage1"><span class="wiz-ai-stage-dot"></span><span>🏨 Selecting top hotels for your budget</span></div>
+          <div class="wiz-ai-stage pending" id="wizAIStage2"><span class="wiz-ai-stage-dot"></span><span>🚆 Finding best trains &amp; transport routes</span></div>
+          <div class="wiz-ai-stage pending" id="wizAIStage3"><span class="wiz-ai-stage-dot"></span><span>🍽️ Adding street food &amp; dining spots</span></div>
+          <div class="wiz-ai-stage pending" id="wizAIStage4"><span class="wiz-ai-stage-dot"></span><span>💡 Gathering local insider tips</span></div>
+          <div class="wiz-ai-stage pending" id="wizAIStage5"><span class="wiz-ai-stage-dot"></span><span>✦ Finalising your AI itinerary</span></div>
+        </div>
+        <div class="wiz-ai-progress-wrap">
+          <div class="wiz-ai-progress-bar"><div class="wiz-ai-progress-fill" id="wizAIProgress" style="width:0%"></div></div>
+          <span class="wiz-ai-progress-label" id="wizAIProgressLabel">0%</span>
+        </div>
+        <div class="wiz-ai-typing-row">
+          <div class="wiz-ai-typing-dots"><span></span><span></span><span></span></div>
+          <span class="wiz-ai-typing-text">AI is thinking…</span>
+        </div>
+      </div>`;
+
+    document.getElementById('wizardCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // ── Animate stages while API call runs ──
+    const stagePcts = [12, 28, 46, 62, 78, 92];
+    const stageTimers = stagePcts.map((pct, si) => setTimeout(() => {
+        if (si > 0) {
+            const prev = document.getElementById(`wizAIStage${si - 1}`);
+            if (prev) { prev.classList.add('done'); prev.querySelector('.wiz-ai-stage-dot').classList.remove('anim'); }
+        }
+        const cur = document.getElementById(`wizAIStage${si}`);
+        if (cur) { cur.classList.remove('pending'); cur.querySelector('.wiz-ai-stage-dot').classList.add('anim'); }
+        const prog = document.getElementById('wizAIProgress');
+        const lbl  = document.getElementById('wizAIProgressLabel');
+        if (prog) prog.style.width = pct + '%';
+        if (lbl)  lbl.textContent  = pct + '%';
+    }, si * 1200));
+
+    function finishLoading() {
+        stageTimers.forEach(t => clearTimeout(t));
+        for (let i = 0; i < 6; i++) {
+            const s = document.getElementById(`wizAIStage${i}`);
+            if (s) { s.classList.remove('pending'); s.classList.add('done'); s.querySelector('.wiz-ai-stage-dot').classList.remove('anim'); }
+        }
+        const prog = document.getElementById('wizAIProgress');
+        const lbl  = document.getElementById('wizAIProgressLabel');
+        if (prog) prog.style.width = '100%';
+        if (lbl)  lbl.textContent  = '100%';
+    }
 
     try {
         // LEAN prompt — no giant example JSON, just a tight schema description
@@ -762,7 +812,10 @@ Reply ONLY in JSON. No markdown. Use REAL named places, hotels, trains, buses.
 Rules: Each day 4-5 spots. All spots/hotels/trains REAL. Numbers as integers in INR.`;
 
         const response = await callGroqAI([{ role: 'user', content: prompt }]);
-        clearInterval(stageInterval);
+        finishLoading();
+        await new Promise(r => setTimeout(r, 500));
+        aiLoadEl.style.display = 'none';
+        document.getElementById('wizFooter').style.display = '';
         let planData;
         try {
             planData = JSON.parse(response.replace(/```json|```/g, '').trim());
@@ -771,7 +824,10 @@ Rules: Each day 4-5 spots. All spots/hotels/trains REAL. Numbers as integers in 
         }
         wizRenderResults(planData, dest, dur);
     } catch (err) {
-        clearInterval(stageInterval);
+        finishLoading();
+        await new Promise(r => setTimeout(r, 400));
+        aiLoadEl.style.display = 'none';
+        document.getElementById('wizFooter').style.display = '';
         wizRenderResults(wizBuildFallback(dest, dur, cityData), dest, dur);
     }
 }
@@ -1493,44 +1549,34 @@ function removeTyping(id) {
 //  ⬇️  PASTE YOUR FREE GROQ API KEY BELOW
 //     Get one free at: https://console.groq.com → API Keys
 // ═══════════════════════════════════════════════════════════════
-const GROQ_API_KEY = 'YOUR_GROQ_API_KEY_HERE'; // ← Replace this!
-const GROQ_MODEL   = 'llama-3.3-70b-versatile';
-const GROQ_URL     = 'https://api.groq.com/openai/v1/chat/completions';
+ // ← Replace this!
+const AI_PROXY_URL = 'https://travel-ai-server-btgt.onrender.com/api/chat';
 
+// FIX 1: Renamed from callClaudeAI → callGroqAI so all callers work
 async function callGroqAI(messages) {
-    if (!GROQ_API_KEY || GROQ_API_KEY === 'YOUR_GROQ_API_KEY_HERE') {
-        throw new Error('Add your Groq API key in script.js (get it free at console.groq.com)');
-    }
-
+    // Filter to only user/assistant roles
     const apiMessages = messages
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => ({ role: m.role, content: m.content }));
 
-    if (!apiMessages.length) throw new Error('No messages to send');
+    // FIX 4: Only check for empty messages, no fragile role check
+    if (!apiMessages.length) {
+        throw new Error('No messages to send');
+    }
 
-    const response = await fetch(GROQ_URL, {
+    const response = await fetch(AI_PROXY_URL, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-            model: GROQ_MODEL,
-            messages: apiMessages,
-            max_tokens: 4096,
-            temperature: 0.7
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: apiMessages })
     });
 
     if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        if (response.status === 401) throw new Error('Invalid Groq API key — check GROQ_API_KEY in script.js');
-        if (response.status === 429) throw new Error('Rate limit — wait a moment and try again');
-        throw new Error(err?.error?.message || `Groq error ${response.status}`);
+        throw new Error(err?.error || `Server Error: ${response.status}`);
     }
 
     const data = await response.json();
-    return data.choices?.[0]?.message?.content || '';
+    return data.reply || '';
 }
 
 // ─── CONTACT FORM ───────────────────────────────────────────────
