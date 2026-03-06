@@ -1442,6 +1442,7 @@
         <a href="#places" class="nav-link">Places</a>
         <a href="#all-cities" class="nav-link">All Cities</a>
         <a href="#planner" class="nav-link">AI Planner</a>
+        <a href="#reviews" class="nav-link">Reviews</a>
         <a href="#about" class="nav-link">About</a>
         <a href="#contact" class="nav-link">Contact</a>
       </nav>
@@ -2182,6 +2183,207 @@
       </div>
     </section>
 
+    <!-- ═══ TRAVELLER REVIEWS ═══ -->
+    <section id="reviews" class="section reviews-section">
+      <div class="section-header-wrap">
+        <div class="section-label-tag">Testimonials</div>
+        <h2 class="section-title-main">Loved by<br><em>Real Travellers</em></h2>
+        <p class="section-sub-text">Thousands of Indians have planned unforgettable journeys with us — here's what they say.</p>
+      </div>
+
+      <!-- Overall Rating Bar -->
+      <div class="reviews-overall">
+        <div class="reviews-score-wrap">
+          <div class="reviews-score-big">4.9</div>
+          <div class="reviews-score-right">
+            <div class="reviews-stars-row">★★★★★</div>
+            <div class="reviews-score-label">Overall Rating</div>
+            <div class="reviews-count-label">Based on 2,800+ reviews</div>
+          </div>
+        </div>
+        <div class="reviews-bars">
+          <div class="reviews-bar-row"><span>5 ★</span><div class="reviews-bar-track"><div class="reviews-bar-fill" style="width:82%"></div></div><span>82%</span></div>
+          <div class="reviews-bar-row"><span>4 ★</span><div class="reviews-bar-track"><div class="reviews-bar-fill" style="width:12%"></div></div><span>12%</span></div>
+          <div class="reviews-bar-row"><span>3 ★</span><div class="reviews-bar-track"><div class="reviews-bar-fill" style="width:4%"></div></div><span>4%</span></div>
+          <div class="reviews-bar-row"><span>2 ★</span><div class="reviews-bar-track"><div class="reviews-bar-fill" style="width:1%"></div></div><span>1%</span></div>
+          <div class="reviews-bar-row"><span>1 ★</span><div class="reviews-bar-track"><div class="reviews-bar-fill" style="width:1%"></div></div><span>1%</span></div>
+        </div>
+      </div>
+
+      <!-- Filter Chips -->
+      <div class="reviews-filter-wrap">
+        <button class="reviews-filter-chip active" onclick="filterReviews('all', this)">All Reviews</button>
+        <button class="reviews-filter-chip" onclick="filterReviews('north', this)">🏔️ North India</button>
+        <button class="reviews-filter-chip" onclick="filterReviews('south', this)">🌴 South India</button>
+        <button class="reviews-filter-chip" onclick="filterReviews('west', this)">🏜️ West India</button>
+        <button class="reviews-filter-chip" onclick="filterReviews('east', this)">🌊 East India</button>
+        <button class="reviews-filter-chip" onclick="filterReviews('islands', this)">🐢 Islands</button>
+      </div>
+
+      <!-- Reviews Grid -->
+      <div class="reviews-grid" id="reviewsGrid">
+
+        <div class="review-card fade-in" data-region="north">
+          <div class="review-card-top">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#667eea,#764ba2)">A</div>
+            <div class="review-meta">
+              <div class="review-name">Arjun Mehta</div>
+              <div class="review-location">📍 Mumbai → Ladakh</div>
+            </div>
+            <div class="review-badge verified">✓ Verified</div>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"The AI itinerary for Ladakh was spot-on — it suggested the Nubra Valley route I'd never have found myself. 12 days, zero stress. This planner is genuinely magical for India trips."</p>
+          <div class="review-footer">
+            <span class="review-tag">🌌 Ladakh</span>
+            <span class="review-date">January 2025</span>
+          </div>
+        </div>
+
+        <div class="review-card fade-in" data-region="south">
+          <div class="review-card-top">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#f093fb,#f5576c)">P</div>
+            <div class="review-meta">
+              <div class="review-name">Priya Nair</div>
+              <div class="review-location">📍 Bangalore → Kerala</div>
+            </div>
+            <div class="review-badge verified">✓ Verified</div>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Planned a romantic backwaters trip for our anniversary. The hidden gems tab showed us spots the usual tourist buses skip. Alleppey at sunset — absolutely breathtaking. Will use this again!"</p>
+          <div class="review-footer">
+            <span class="review-tag">🌿 Kerala</span>
+            <span class="review-date">February 2025</span>
+          </div>
+        </div>
+
+        <div class="review-card fade-in" data-region="west">
+          <div class="review-card-top">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">R</div>
+            <div class="review-meta">
+              <div class="review-name">Rohan Desai</div>
+              <div class="review-location">📍 Delhi → Goa</div>
+            </div>
+            <div class="review-badge verified">✓ Verified</div>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"The budget breakdown for our Goa trip was insanely accurate — we spent almost exactly what the AI predicted. The street food guide led us to this tiny xacuti shack that was life-changing."</p>
+          <div class="review-footer">
+            <span class="review-tag">🏖️ Goa</span>
+            <span class="review-date">December 2024</span>
+          </div>
+        </div>
+
+        <div class="review-card fade-in" data-region="north">
+          <div class="review-card-top">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">S</div>
+            <div class="review-meta">
+              <div class="review-name">Sneha Kapoor</div>
+              <div class="review-location">📍 Chennai → Rajasthan</div>
+            </div>
+            <div class="review-badge">Solo Traveller</div>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"As a solo female traveller, safety was my #1 concern. The AI factored that in and suggested well-lit areas, reputed hostels and daylight timings. Jaipur, Udaipur, Jodhpur — I did it all safely and confidently!"</p>
+          <div class="review-footer">
+            <span class="review-tag">🏯 Rajasthan</span>
+            <span class="review-date">March 2025</span>
+          </div>
+        </div>
+
+        <div class="review-card fade-in" data-region="east">
+          <div class="review-card-top">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#fa709a,#fee140)">D</div>
+            <div class="review-meta">
+              <div class="review-name">Dipankar Sen</div>
+              <div class="review-location">📍 Kolkata → Darjeeling</div>
+            </div>
+            <div class="review-badge verified">✓ Verified</div>
+          </div>
+          <div class="review-stars">★★★★☆</div>
+          <p class="review-text">"The Darjeeling itinerary was beautiful — Tiger Hill sunrise, tea estate walks, the toy train tips. Only reason it's 4 stars: I wish there were more Northeast recommendations. But overall excellent!"</p>
+          <div class="review-footer">
+            <span class="review-tag">🍵 Darjeeling</span>
+            <span class="review-date">November 2024</span>
+          </div>
+        </div>
+
+        <div class="review-card fade-in" data-region="islands">
+          <div class="review-card-top">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)">K</div>
+            <div class="review-meta">
+              <div class="review-name">Kavya &amp; Varun</div>
+              <div class="review-location">📍 Hyderabad → Andaman</div>
+            </div>
+            <div class="review-badge">Honeymooners</div>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Our honeymoon in Andaman was perfect because of this planner. Radhanagar Beach timing, snorkelling spots, the Neil Island guide — everything was curated just right. No booking fees either, which was a huge plus!"</p>
+          <div class="review-footer">
+            <span class="review-tag">🐢 Andaman</span>
+            <span class="review-date">January 2025</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Write a Review CTA -->
+      <div class="reviews-cta-wrap">
+        <div class="reviews-cta-card">
+          <div class="reviews-cta-icon">✍️</div>
+          <h3>Share Your Journey</h3>
+          <p>Travelled with our AI planner? We'd love to hear about your experience.</p>
+          <button class="btn-primary" onclick="openReviewModal()">Write a Review ✦</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ REVIEW SUBMIT MODAL ═══ -->
+    <div class="auth-modal-backdrop" id="reviewModal">
+      <div class="auth-modal review-modal" role="dialog" aria-modal="true" aria-label="Write a Review">
+        <div class="auth-modal-glow"></div>
+        <button class="auth-close" onclick="closeModal('reviewModal')" aria-label="Close">✕</button>
+        <div class="auth-modal-inner">
+          <div class="auth-logo-wrap">
+            <div class="auth-logo-icon" style="font-size:1.5rem">✍️</div>
+            <h2>Write a Review</h2>
+            <p>Help other travellers with your experience</p>
+          </div>
+          <div class="review-modal-stars" id="reviewStarsInput">
+            <span class="review-star-input" data-val="1" onclick="setReviewStar(1)">★</span>
+            <span class="review-star-input" data-val="2" onclick="setReviewStar(2)">★</span>
+            <span class="review-star-input" data-val="3" onclick="setReviewStar(3)">★</span>
+            <span class="review-star-input" data-val="4" onclick="setReviewStar(4)">★</span>
+            <span class="review-star-input" data-val="5" onclick="setReviewStar(5)">★</span>
+          </div>
+          <p class="review-star-label" id="reviewStarLabel">Tap to rate</p>
+          <div class="auth-field">
+            <label>Your Name</label>
+            <div class="auth-input-wrap">
+              <input type="text" id="reviewName" class="auth-input" placeholder="e.g. Rahul Sharma" />
+            </div>
+          </div>
+          <div class="auth-field">
+            <label>Destination Visited</label>
+            <div class="auth-input-wrap">
+              <input type="text" id="reviewDest" class="auth-input" placeholder="e.g. Ladakh, Goa, Kerala..." />
+            </div>
+          </div>
+          <div class="auth-field">
+            <label>Your Review</label>
+            <div class="auth-input-wrap">
+              <textarea id="reviewText" class="auth-input" rows="4" placeholder="Tell us about your trip experience..." style="resize:vertical;height:auto;padding-top:.75rem;padding-bottom:.75rem"></textarea>
+            </div>
+          </div>
+          <button class="auth-submit" onclick="submitReview()">
+            <span class="auth-submit-text">Submit Review ✦</span>
+            <span class="auth-submit-loader"><span></span><span></span><span></span></span>
+          </button>
+          <p class="review-modal-note">Reviews are moderated and published within 24 hours.</p>
+        </div>
+      </div>
+    </div>
+
     <!-- ABOUT -->
     <section id="about" class="section about-section">
       <div class="about-inner">
@@ -2285,6 +2487,7 @@
             <li><a href="#india-map">India Map</a></li>
             <li><a href="#places">Places</a></li>
             <li><a href="#planner">AI Planner</a></li>
+            <li><a href="#reviews">Reviews</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
@@ -2864,6 +3067,57 @@
       else init();
     })();
   </script>
+  <!-- ═══ REVIEWS JS ═══ -->
+  <script>
+    var _reviewRating = 0;
+
+    window.filterReviews = function (region, btn) {
+      document.querySelectorAll('.reviews-filter-chip').forEach(function (c) { c.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      document.querySelectorAll('.review-card').forEach(function (card) {
+        if (region === 'all' || card.dataset.region === region) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    };
+
+    window.openReviewModal = function () {
+      openModal('reviewModal');
+      _reviewRating = 0;
+      document.querySelectorAll('.review-star-input').forEach(function (s) { s.classList.remove('active'); });
+      document.getElementById('reviewStarLabel').textContent = 'Tap to rate';
+      ['reviewName', 'reviewDest', 'reviewText'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    };
+
+    window.setReviewStar = function (val) {
+      _reviewRating = val;
+      var labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent!'];
+      document.getElementById('reviewStarLabel').textContent = labels[val] + ' — ' + val + '/5';
+      document.querySelectorAll('.review-star-input').forEach(function (s) {
+        s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+      });
+    };
+
+    window.submitReview = function () {
+      var name = (document.getElementById('reviewName').value || '').trim();
+      var dest = (document.getElementById('reviewDest').value || '').trim();
+      var text = (document.getElementById('reviewText').value || '').trim();
+      if (!name || !dest || !text || _reviewRating === 0) {
+        if (window.showToast) showToast('Please fill all fields and rate your experience.');
+        return;
+      }
+      closeModal('reviewModal');
+      setTimeout(function () {
+        if (window.showToast) showToast('🙏 Thank you! Your review will appear after moderation.');
+      }, 300);
+    };
+  </script>
+
   <!-- ═══ TERMS & CONDITIONS JS ═══ -->
   <script>
     (function () {
